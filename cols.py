@@ -6,12 +6,20 @@ def get_level(s):
     # return len(s) - len(s.lstrip()) # just \n produces 1
     return len(re.match(r"^[ \t]*",s).group(0))
 
+def get_parts(s,skip_start=True):
+    ret=[]
+    for part in (s[s.index("-") + 1:] if skip_start else s).split(' - '):
+        fpart = part.strip()
+        if fpart != '': ret.append(fpart)
+    return ret
+
 class ColItem:
     def __init__(self):
-        pass
+        self.parts=[]
 
     def parse(self,raw):
-        self.raw=raw
+        self.parts = get_parts(raw,skip_start=False)
+
 
 class ColSection:
     def __init__(self):
@@ -22,10 +30,7 @@ class ColSection:
 
     def parse(self, raw):
         with StringIO(raw) as r:
-            start_line = r.readline()
-            for part in start_line[start_line.index("-")+1:].split(' - '):
-                fpart=part.strip()
-                if fpart!='': self.parts.append(fpart)
+            self.parts = get_parts(r.readline())
 
             while True:
                 line=r.readline()
