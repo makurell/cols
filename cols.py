@@ -167,6 +167,14 @@ class ColFile:
             ret+=ind+section.to_string(indent=indent)
         return ret
 
+    def serialise(self,indent="\t"):
+        ret=self.meta
+        for i in range(len(self.meta.strip())):
+            ret+='-'
+        ret+="\n\n"
+        ret+=self.to_string(indent=indent)
+        return ret
+
     def __str__(self):
         return self.to_string()
 
@@ -179,4 +187,4 @@ class ColFile:
 if __name__=="__main__":
     cf = ColFile("data.col")
     cf.parse()
-    print(cf.to_string())
+    print(cf.serialise())
