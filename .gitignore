@@ -1,5 +1,5 @@
 # col stuff
-.proc.col
+*.proc.col
 cols/
 
 # User-specific stuff
