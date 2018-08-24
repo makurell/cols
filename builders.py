@@ -20,7 +20,7 @@ def default_render(item: ColItem, path):
     write_img(item.get_remote(),path+item.get_name()+'.jpeg')
 #endregion
 #region pixiv
-api=AppPixivAPI
+api=AppPixivAPI()
 def pixiv_render(item,path):
     pass
 
