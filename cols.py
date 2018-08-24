@@ -16,6 +16,8 @@ def get_parts(s,skip_start=True):
     for part in (s[s.index("-") + 1:] if skip_start else s).split(' - '):
         fpart = part.strip()
         if fpart != '': ret.append(fpart)
+    for i in range(max(3 - len(ret), 0)):
+        ret.append(None)
     return ret
 
 class ColItem:
@@ -28,9 +30,11 @@ class ColItem:
         for part in raw.strip().split(' '):
             fpart = part.strip()
             if fpart != '': self.parts.append(fpart)
+        for i in range(max(3-len(self.parts),0)):
+            self.parts.append(None)
 
     def render(self):
-        print(self.get_remote())
+        self.write(self,self.parent.get_path())
 
     #region serialisation
     def get_name(self):
@@ -220,21 +224,22 @@ class ColFile:
                                 buf+=innerline
 
     def build(self):
-        self.process()
-        # self.render()
+        proc=self.process()
+        proc.render()
+        proc.write()
 
     def process(self):
         #make proc file
         proc=ColFile(path=os.path.splitext(self.path)[0]+'.proc.col')
         for section in self.sections:
             proc.sections.append(ColFile.__process_helper(section))
-        proc.write()
+        return proc
 
     @staticmethod
     def __process_helper(proc: ColSection):
-        if DEBUG:
-            time.sleep(0.05)
-            print(proc.get_path(1))
+        # if DEBUG:
+        #     time.sleep(0.05)
+        #     print(proc.get_path(1))
         section_list = []
         section_list.extend(proc.sections)
         proc.sections.clear()
@@ -249,7 +254,7 @@ class ColFile:
 
     @staticmethod
     def __process_item(proc: ColSection, item: ColItem):
-        if DEBUG: print(item.get_remote())
+        # if DEBUG: print(item.get_remote())
         for hook in builders.hooks:
             if re.match("^"+hook[0]+"$",proc.get_path(1)):
                 try:
