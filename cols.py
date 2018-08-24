@@ -1,9 +1,12 @@
 import re
 import os
+import errno
 import time
+import builders
 from io import StringIO
 
-#utils methods
+#globals
+DEBUG=True
 def get_level(s):
     # return len(s) - len(s.lstrip()) # just \n produces 1
     return len(re.match(r"^[ \t]*",s).group(0))
@@ -19,11 +22,23 @@ class ColItem:
     def __init__(self,parent):
         self.parts=[]
         self.parent=parent
+        self.write=None
 
     def parse(self,raw):
-        self.parts = get_parts(raw,skip_start=False)
+        for part in raw.strip().split(' '):
+            fpart = part.strip()
+            if fpart != '': self.parts.append(fpart)
+
+    def render(self):
+        print(self.get_remote())
 
     #region serialisation
+    def get_name(self):
+        return self.parts[1]
+
+    def get_remote(self):
+        return self.parts[0]
+
     def to_string(self):
         ret = ""
 
@@ -89,11 +104,24 @@ class ColSection:
                     item.parse(line)
                     self.items.append(item)
 
+    def render(self):
+        dir=self.get_path()
+        if DEBUG: print(dir)
+        try:
+            os.makedirs(dir)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+        for section in self.sections:
+            section.render()
+        for item in self.items:
+            item.render()
+
     #region serialisation
-    def get_name(self,name_version):
+    def get_name(self,name_version=0):
         return re.sub("\([\s\S]*\)","",self.parts[name_version]).strip().replace(" ","-")
 
-    def get_path(self, name_version=1):
+    def get_path(self, name_version=0):
         path_list = [self.get_name(name_version=name_version)]
 
         parent=self.parent
@@ -149,6 +177,7 @@ class ColFile:
         self.path = path
         self.depth=0
         self.parent=None
+        self.base_path="cols"
 
     def parse(self,raw=None):
         if raw is None:
@@ -192,7 +221,7 @@ class ColFile:
 
     def build(self):
         self.process()
-        self.render()
+        # self.render()
 
     def process(self):
         #make proc file
@@ -203,31 +232,51 @@ class ColFile:
 
     @staticmethod
     def __process_helper(proc: ColSection):
-        time.sleep(0.5)
-        print(proc.get_path())
+        if DEBUG:
+            time.sleep(0.05)
+            print(proc.get_path(1))
         section_list = []
         section_list.extend(proc.sections)
         proc.sections.clear()
         for section in section_list:
             proc.sections.append(ColFile.__process_helper(section))
-        proc=ColFile.__process_items(proc)
-        return proc
-
-    @staticmethod
-    def __process_items(proc: ColSection):
         item_list = []
         item_list.extend(proc.items)
         proc.items.clear()
         for item in item_list:
-            proc.items.append(item)
+            proc=ColFile.__process_item(proc,item)
+        return proc
+
+    @staticmethod
+    def __process_item(proc: ColSection, item: ColItem):
+        if DEBUG: print(item.get_remote())
+        for hook in builders.hooks:
+            if re.match("^"+hook[0]+"$",proc.get_path(1)):
+                try:
+                    if hook[2] is not None:
+                        item.write=hook[2]
+                    else: raise IndexError
+                except IndexError:
+                    item.write=builders.default_render
+
+                procmeth=builders.default_process
+                try:
+                    if hook[1] is not None: procmeth=hook[1]
+                except IndexError: pass
+                proc=procmeth(proc,item)
+                break
+        else:
+            item.write=builders.default_render
+            proc=builders.default_process(proc,item)
         return proc
 
     def render(self):
-        pass
+        for section in self.sections:
+            section.render()
 
     #region serialisation
-    def get_path(self):
-        return ''
+    def get_name(self,name_version=0):
+        return self.base_path
 
     def to_string(self,indent="\t"):
         ind=""
@@ -263,5 +312,7 @@ class ColFile:
 if __name__=="__main__":
     cf = ColFile("data.col")
     cf.parse()
-    #print(cf.serialise())
+    # print(cf.serialise())
     cf.build()
+    # print(cf.serialise())
+
