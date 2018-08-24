@@ -48,6 +48,7 @@ class ColItem:
 
         # parts
         for part in self.parts:
+            if part is None: continue
             ret += part + " "
         ret += "\n"
 
@@ -65,11 +66,11 @@ class ColItem:
 
 
 class ColSection:
-    def __init__(self,parent):
+    def __init__(self, parent):
         self.items=[]
         self.parts=[]
         self.sections=[]
-        self.depth=0
+        self.depth=parent.depth+1
         self.parent=parent
         pass
 
@@ -151,6 +152,7 @@ class ColSection:
         #parts
         ret+=ind
         for part in self.parts:
+            if part is None: continue
             ret+="- "+part+" "
         ret+="\n"
 
@@ -185,7 +187,7 @@ class ColFile:
 
     def parse(self,raw=None):
         if raw is None:
-            with open(self.path, 'r') as f:
+            with open(self.path, 'r',encoding='utf-8') as f:
                 self.raw=f.read()
         else:
             self.raw=raw
@@ -301,7 +303,7 @@ class ColFile:
         return ret
 
     def write(self):
-        with open(self.path, 'w') as f:
+        with open(self.path, 'w', encoding='utf-8') as f:
             f.write(self.serialise())
 
     def __str__(self):
