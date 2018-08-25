@@ -20,7 +20,9 @@ def write_img(remote,local):
         img.save(local,quality=75,optimize=True)
 
 def default_render(item: ColItem, base_path):
-    write_img(item.get_remote(),base_path+item.get_name()+'.jpeg') #todo case where no name given
+    path=base_path+item.get_name()+'.jpeg'
+    write_img(item.get_remote(),path) #todo case where no name given
+    return path
 #endregion
 #region pixiv
 api=AppPixivAPI()
@@ -36,7 +38,7 @@ def pixiv_render(item,base_path):
     illust_id = get_illust_id(item.get_remote())
 
     detail = api.illust_detail(illust_id)
-    path=os.path.abspath(base_path+str(detail['illust']['user']['name'])+'_'+str(detail['illust']['user']['id']))
+    path=(base_path+str(detail['illust']['user']['name'])+'_'+str(detail['illust']['user']['id']))
     cpath(path)
 
     urls = []
@@ -59,8 +61,12 @@ def pixiv_render(item,base_path):
                 urls.append(detail['illust']['image_urls']['large'])
             except (NameError, KeyError): pass
 
+    ret=[]
     for url in urls:
-        api.download(url, prefix=str(detail['illust']['title'])+'_'+str(illust_id), path=os.path.abspath(path))
+        name=str(detail['illust']['title']) + '_' + str(illust_id) + os.path.basename(url)
+        ret.append(path+'/'+name)
+        api.download(url, name=name, path=os.path.abspath(path))
+    return ret
 #endregion
 
 hooks=[

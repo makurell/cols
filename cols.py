@@ -1,3 +1,4 @@
+import hashlib
 import re
 import os
 import errno
@@ -42,9 +43,9 @@ class ColItem:
             self.parts.append(None)
 
     def render(self):
-        save=get_renderer(self)
-        save(self,self.parent.get_path())
         if DEBUG: print(self.get_remote())
+        save=get_renderer(self)
+        return save(self,self.parent.get_path())
 
     #region serialisation
     def get_name(self):
@@ -119,6 +120,7 @@ class ColSection:
                     self.items.append(item)
 
     def render(self):
+        ret=[]
         path=self.get_path()
         try:
             os.makedirs(path)
@@ -127,9 +129,10 @@ class ColSection:
                 raise
         if DEBUG: print(self.get_path(1))
         for section in self.sections:
-            section.render()
+            ret.extend(section.render())
         for item in self.items:
-            item.render()
+            ret.append((item,item.render()))
+        return ret
 
     #region serialisation
     def get_name(self,name_version=0):
@@ -235,8 +238,23 @@ class ColFile:
                                 buf+=innerline
 
     def render(self):
+        #todo build from saved locs
+
+        #render everything and build locdict
+        locs={}
         for section in self.sections:
-            section.render()
+            for loc in section.render():
+                hash = hashlib.sha256(str(loc[0].get_remote()).encode('utf-8')).hexdigest()
+                if hash not in locs:
+                    locs[hash]=loc[1]
+                else:
+                    if DEBUG: print("DUPLICATE: "+loc[0].get_remote())
+                    locs[hash].extend(loc[1])
+
+        #todo building locs from local files
+        for root, dirnames, filenames in os.walk(self.base_path):
+            for filename in filenames:
+                print(filename)
 
     #region serialisation
     def get_name(self,name_version=0):
