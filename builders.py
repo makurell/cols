@@ -45,21 +45,6 @@ def pixiv_render(item,base_path):
         url = detail['illust']['image_urls']['large']
 
     api.download(url, prefix=str(detail['illust']['title'])+'_'+str(illust_id), path=os.path.abspath(path))
-
-def pixiv_process(proc: ColSection, item: ColItem):
-    illust_id=get_illust_id(item.get_remote())
-
-    detail=api.illust_detail(illust_id)
-    item.parts[1]=str(detail['illust']['title'])+'-'+str(illust_id)
-
-    sec = ColSection(proc)
-    sec.parts.append(str(detail['illust']['user']['name'])+'-'+str(detail['illust']['user']['id']))
-    item.parent=sec
-    sec.items.append(item)
-    #todo: store details in item somehow + thing like date modified
-
-    proc.sections.append(sec)
-    return proc
 #endregion
 
 hooks=[

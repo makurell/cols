@@ -1,7 +1,6 @@
 import re
 import os
 import errno
-import time
 import builders
 from io import StringIO
 
@@ -234,61 +233,6 @@ class ColFile:
                             else:
                                 buf+=innerline
 
-    def build(self):
-        # proc=self.process()
-        # proc.render()
-        # if DEBUG: print(proc)
-        self.render()
-
-    #region process stuff
-    def process(self):
-        #make proc file
-        proc=ColFile(path=os.path.splitext(self.path)[0]+'.proc.col')
-        for section in self.sections:
-            proc.sections.append(ColFile.__process_helper(section))
-        return proc
-
-    @staticmethod
-    def __process_helper(proc: ColSection):
-        # if DEBUG:
-        #     time.sleep(0.05)
-        #     print(proc.get_path(1))
-        section_list = []
-        section_list.extend(proc.sections)
-        proc.sections.clear()
-        for section in section_list:
-            proc.sections.append(ColFile.__process_helper(section))
-        item_list = []
-        item_list.extend(proc.items)
-        proc.items.clear()
-        for item in item_list:
-            proc=ColFile.__process_item(proc,item)
-        return proc
-
-    @staticmethod
-    def __process_item(proc: ColSection, item: ColItem):
-        # if DEBUG: print(item.get_remote())
-        for hook in builders.hooks:
-            if re.match("^"+hook[0]+"$",proc.get_path(1)):
-                try:
-                    if hook[2] is not None:
-                        item.write=hook[2]
-                    else: raise IndexError
-                except IndexError:
-                    item.write=builders.default_render
-
-                procmeth=builders.default_process
-                try:
-                    if hook[1] is not None: procmeth=hook[1]
-                except IndexError: pass
-                proc=procmeth(proc,item)
-                break
-        else:
-            item.write=builders.default_render
-            proc=builders.default_process(proc,item)
-        return proc
-    #endregion
-
     def render(self):
         for section in self.sections:
             section.render()
@@ -332,6 +276,6 @@ if __name__=="__main__":
     cf = ColFile("data.col")
     cf.parse()
     # print(cf.serialise())
-    cf.build()
+    cf.render()
     # print(cf.serialise())
 
