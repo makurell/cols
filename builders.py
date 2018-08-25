@@ -39,13 +39,28 @@ def pixiv_render(item,base_path):
     path=os.path.abspath(base_path+str(detail['illust']['user']['name'])+'_'+str(detail['illust']['user']['id']))
     cpath(path)
 
-    url = None
-    try:
-        url = detail['illust']['meta_single_page']['original_image_url']
-    except (NameError, KeyError):
-        url = detail['illust']['image_urls']['large']
+    urls = []
+    if detail['illust']['page_count'] > 1:
+        for page in detail['illust']['meta_pages']:
+            page_url=None
+            try:
+                page_url=page['image_urls']['original']
+            except (NameError,KeyError):
+                try:
+                    page_url=list(page['image_urls'].values())[-1]
+                except (NameError,KeyError): pass
+            if page_url is not None:
+                urls.append(page_url)
+    if len(urls)<=0:
+        try:
+            urls.append(detail['illust']['meta_single_page']['original_image_url'])
+        except (NameError, KeyError):
+            try:
+                urls.append(detail['illust']['image_urls']['large'])
+            except (NameError, KeyError): pass
 
-    api.download(url, prefix=str(detail['illust']['title'])+'_'+str(illust_id), path=os.path.abspath(path))
+    for url in urls:
+        api.download(url, prefix=str(detail['illust']['title'])+'_'+str(illust_id), path=os.path.abspath(path))
 #endregion
 
 hooks=[
