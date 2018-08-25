@@ -86,7 +86,7 @@ class ColSection:
         with StringIO(raw) as r:
             start_line=r.readline()
             self.parts = get_parts(start_line)
-            self.depth=get_level(start_line)
+            # self.depth=get_level(start_line)
 
             while True:
                 line=r.readline()
@@ -189,7 +189,7 @@ class ColFile:
         self.raw = None
         self.meta = ""
         self.path = path
-        self.depth=0
+        self.depth=-1
         self.parent=None
         self.base_path="cols"
 
@@ -275,7 +275,7 @@ class ColFile:
 if __name__=="__main__":
     cf = ColFile("data.col")
     cf.parse()
-    # print(cf.serialise())
+    # print(cf.serialise('\t\t'))
     cf.render()
     # print(cf.serialise())
 
