@@ -44,6 +44,7 @@ class ColItem:
     def render(self):
         save=get_renderer(self)
         save(self,self.parent.get_path())
+        if DEBUG: print(self.get_remote())
 
     #region serialisation
     def get_name(self):
@@ -124,7 +125,7 @@ class ColSection:
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
-        if DEBUG: print(path)
+        if DEBUG: print(self.get_path(1))
         for section in self.sections:
             section.render()
         for item in self.items:

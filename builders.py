@@ -32,6 +32,7 @@ def get_illust_id(url):
     return urlparse.parse_qs(urlparse.urlparse(url).query)['illust_id'][0]
 
 def pixiv_render(item,base_path):
+    #todo multiple pictures case (manga) (either create dir or do all)
     illust_id = get_illust_id(item.get_remote())
 
     detail = api.illust_detail(illust_id)
