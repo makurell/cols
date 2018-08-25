@@ -28,6 +28,13 @@ def get_renderer(item):
                     return hook[1]
             except IndexError: pass
     return builders.default_render
+
+def hash_file(file_path):
+    m=hashlib.sha256()
+    with open(file_path, 'rb') as f:
+        for chunk in iter(lambda: f.read(4096),b''):
+            m.update(chunk)
+    return m.hexdigest()
 #endregion
 
 class ColItem:
@@ -248,13 +255,21 @@ class ColFile:
                 if hash not in locs:
                     locs[hash]=loc[1]
                 else:
-                    if DEBUG: print("DUPLICATE: "+loc[0].get_remote())
-                    locs[hash].extend(loc[1])
+                    print("LOCAL MANAGER SHALL HANDLE DUP: "+loc[0].get_remote()+" - "+','.join(loc[1]))
+                    pass # do not add this duplicate to the hashdict - let local file manager handle it
 
-        #todo building locs from local files
+        # building locs from local files
+        rendered_paths=[x for l in list(locs.values()) for x in l]
         for root, dirnames, filenames in os.walk(self.base_path):
             for filename in filenames:
-                print(filename)
+                cpath=root.replace('\\','/')+'/'+filename
+                for path in rendered_paths:
+                    if path==cpath:
+                        rendered_paths.remove(path)
+                        break
+                else:
+                    if DEBUG: print("local file: "+cpath)
+                    hash = hash_file(cpath)
 
     #region serialisation
     def get_name(self,name_version=0):

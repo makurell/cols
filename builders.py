@@ -22,7 +22,7 @@ def write_img(remote,local):
 def default_render(item: ColItem, base_path):
     path=base_path+item.get_name()+'.jpeg'
     write_img(item.get_remote(),path) #todo case where no name given
-    return path
+    return [path]
 #endregion
 #region pixiv
 api=AppPixivAPI()
