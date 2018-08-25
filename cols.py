@@ -240,6 +240,7 @@ class ColFile:
         # if DEBUG: print(proc)
         self.render()
 
+    #region process stuff
     def process(self):
         #make proc file
         proc=ColFile(path=os.path.splitext(self.path)[0]+'.proc.col')
@@ -286,6 +287,7 @@ class ColFile:
             item.write=builders.default_render
             proc=builders.default_process(proc,item)
         return proc
+    #endregion
 
     def render(self):
         for section in self.sections:
