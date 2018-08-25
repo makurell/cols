@@ -5,7 +5,7 @@ import time
 import builders
 from io import StringIO
 
-#globals
+# region globals
 DEBUG=True
 def get_level(s):
     # return len(s) - len(s.lstrip()) # just \n produces 1
@@ -20,11 +20,20 @@ def get_parts(s,skip_start=True):
         ret.append(None)
     return ret
 
+def get_renderer(item):
+    for hook in builders.hooks:
+        if re.match("^"+hook[0]+"$",item.parent.get_path(1)):
+            try:
+                if hook[1] is not None:
+                    return hook[1]
+            except IndexError: pass
+    return builders.default_render
+#endregion
+
 class ColItem:
     def __init__(self,parent):
         self.parts=[]
         self.parent=parent
-        self.write=None
 
     def parse(self,raw):
         for part in raw.strip().split(' '):
@@ -34,7 +43,8 @@ class ColItem:
             self.parts.append(None)
 
     def render(self):
-        self.write(self,self.parent.get_path())
+        save=get_renderer(self)
+        save(self,self.parent.get_path())
 
     #region serialisation
     def get_name(self):
@@ -63,7 +73,6 @@ class ColItem:
     def __repr__(self):
         return self.to_string()
     #endregion
-
 
 class ColSection:
     def __init__(self, parent):
@@ -110,13 +119,13 @@ class ColSection:
                     self.items.append(item)
 
     def render(self):
-        dir=self.get_path()
-        if DEBUG: print(dir)
+        path=self.get_path()
         try:
-            os.makedirs(dir)
+            os.makedirs(path)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
+        if DEBUG: print(path)
         for section in self.sections:
             section.render()
         for item in self.items:
@@ -226,9 +235,10 @@ class ColFile:
                                 buf+=innerline
 
     def build(self):
-        proc=self.process()
-        proc.render()
-        proc.write()
+        # proc=self.process()
+        # proc.render()
+        # if DEBUG: print(proc)
+        self.render()
 
     def process(self):
         #make proc file
