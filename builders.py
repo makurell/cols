@@ -45,6 +45,7 @@ def pixiv_process(proc: ColSection, item: ColItem):
 
     sec = ColSection(proc)
     sec.parts.append(str(detail['illust']['user']['name'])+'-'+str(detail['illust']['user']['id']))
+    item.parent=sec
     sec.items.append(item)
     #todo: store details in item somehow + thing like date modified
 
