@@ -1,4 +1,5 @@
 import hashlib
+import json
 import re
 import os
 import errno
@@ -52,7 +53,7 @@ class ColItem:
     def render(self):
         if DEBUG: print(self.get_remote())
         save=get_renderer(self)
-        return save(self,self.parent.get_path())
+        return self.parent.get_path(), save(self, self.parent.get_path())
 
     #region serialisation
     def get_name(self):
@@ -255,21 +256,13 @@ class ColFile:
                 if hash not in locs:
                     locs[hash]=loc[1]
                 else:
-                    print("LOCAL MANAGER SHALL HANDLE DUP: "+loc[0].get_remote()+" - "+','.join(loc[1]))
-                    pass # do not add this duplicate to the hashdict - let local file manager handle it
+                    # print("LOCAL MANAGER SHALL HANDLE DUP: "+loc[0].get_remote()+" - "+str(loc[1]))
+                    pass
+        self.save_locs(locs)
 
-        # building locs from local files
-        rendered_paths=[x for l in list(locs.values()) for x in l]
-        for root, dirnames, filenames in os.walk(self.base_path):
-            for filename in filenames:
-                cpath=root.replace('\\','/')+'/'+filename
-                for path in rendered_paths:
-                    if path==cpath:
-                        rendered_paths.remove(path)
-                        break
-                else:
-                    if DEBUG: print("local file: "+cpath)
-                    hash = hash_file(cpath)
+    def save_locs(self, locs):
+        # with open('data.json')
+        pass
 
     #region serialisation
     def get_name(self,name_version=0):
