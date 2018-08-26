@@ -15,6 +15,40 @@ class TestRendering(unittest.TestCase):
             "       https://upload.wikimedia.org/wikipedia/commons/4/43/Chara04.png moe\n",False)
         self.assertTrue(os.path.isfile('cols/a/2/moe.jpeg'),"file exists")
 
+    def test_move(self):
+        # move
+        run("---\n"
+            "- a - anime\n"
+            "   - 1 - 1\n"
+            "       - a\n"
+            "           https://upload.wikimedia.org/wikipedia/commons/4/43/Chara04.png moe\n"
+            "   - 2 - 2\n"
+            "       \n",False)
+        self.assertTrue(os.path.isfile('cols/a/1/a/moe.jpeg'),"dest file exists")
+        self.assertFalse(os.path.isfile('cols/a/2/moe.jpeg'),"src file removed")
+        # move back
+        run("---\n"
+            "- a - anime\n"
+            "   - 1 - 1\n"
+            "       - a\n"
+            "           \n"
+            "   - 2 - 2\n"
+            "       https://upload.wikimedia.org/wikipedia/commons/4/43/Chara04.png moe\n", False)
+        self.assertTrue(os.path.isfile('cols/a/2/moe.jpeg'), "dest file exists")
+        self.assertFalse(os.path.isfile('cols/a/1/a/moe.jpeg'), "src file removed")
+
+    # def test_copy(self):
+    #     # copy
+    #     run("---\n"
+    #         "- a - anime\n"
+    #         "   - 1 - 1\n"
+    #         "       - a\n"
+    #         "           https://upload.wikimedia.org/wikipedia/commons/4/43/Chara04.png moe\n"
+    #         "   - 2 - 2\n"
+    #         "       https://upload.wikimedia.org/wikipedia/commons/4/43/Chara04.png moe\n", False)
+    #     self.assertTrue(os.path.isfile('cols/a/1/a/moe.jpeg'), "dest file exists")
+    #     self.assertTrue(os.path.isfile('cols/a/2/moe.jpeg'), "src file exists")
+
 def setup_testing():
     print('Setting up...')
     if os.path.exists('cols'):
