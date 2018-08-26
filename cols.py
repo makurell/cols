@@ -1,3 +1,4 @@
+import copy
 import hashlib
 import json
 import re
@@ -285,6 +286,7 @@ class ColFile:
                 locs=json.loads(f.read())
         except FileNotFoundError:
             return {}
+        loc_items=copy.deepcopy(locs).items()
 
         non_dels=[] # list of ones to not delete
         for k,v in locs.items():
@@ -300,18 +302,19 @@ class ColFile:
                         item.skip_render=True
                     else:
                         for f in v[1]:
+                            if DEBUG:
+                                if not os.path.isfile(item_path+f): print(v[0]+f+" >> "+item_path+f)
                             cpath(item_path)
                             try:
                                 shutil.copyfile(v[0]+f,item_path+f) # copy to destination
                             except FileNotFoundError:
                                 # the src file (likely) doesn't exist - will need to be rendered again
                                 break
-                            if DEBUG:
-                                if not os.path.isfile(item_path+f): print(v[0]+f+" >> "+item_path+f)
                         else:
+                            locs[k][0]=item_path
                             item.skip_render=True # if loop was never broken (i.e: src file exists)
 
-        for k,v in locs.items():
+        for k,v in list(loc_items):
             if k not in non_dels:
                 # delete orig (because moved, etc)
                 for f in v[1]:
