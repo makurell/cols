@@ -4,6 +4,7 @@ import unittest
 import builders
 from cols import run
 
+DO_FULL=True
 class TestRendering(unittest.TestCase):
     def test_1_nochange(self):
         run("---\n"
@@ -152,6 +153,7 @@ class TestRendering(unittest.TestCase):
         self.assertTrue(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file exists")
 
     def test_5_redownload(self):
+        return
         os.remove('cols/a/2/moe.jpeg')
         run("---\n"
             "- a - anime\n"
@@ -162,6 +164,31 @@ class TestRendering(unittest.TestCase):
             "       https://upload.wikimedia.org/wikipedia/commons/4/43/Chara04.png moe\n", False)
         self.assertFalse(os.path.isfile('cols/a/1/a/moe.jpeg'), "top file does not exist")
         self.assertTrue(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file exists")
+
+    def test_6_reset(self):
+        if not DO_FULL: return
+        run("---\n"
+            "- a - anime\n"
+            "   - 1 - 1\n"
+            "       - a\n"
+            "           \n"
+            "   - 2 - 2\n"
+            "       \n", False)
+        self.assertFalse(os.path.isfile('cols/a/1/a/moe.jpeg'), "top file does not exist")
+        self.assertFalse(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file does not exist")
+
+    def test_7_m(self):
+        if not DO_FULL: return
+        run("---\n"
+            "- a - anime\n"
+            "   - 1 - 1\n"
+            "       - a\n"
+            "           \n"
+            "   - 2 - 2\n"
+            "       https://www.pixiv.net/member_illust.php?mode=medium&illust_id=68427137\n", False)
+        self.assertTrue(os.path.isdir('cols/a/2/Lpip_6996493/'),'dir')
+        self.assertTrue(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p0.jpg'), "bottom0")
+        self.assertTrue(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p1.jpg'), "bottom1")
 
 def setup_testing():
     # print('Setting up...')
