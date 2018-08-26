@@ -141,6 +141,8 @@ class TestRendering(unittest.TestCase):
         self.assertFalse(os.path.isfile('cols/a/1/a/moe.jpeg'), "top file removed")
         self.assertFalse(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file removed")
 
+        #todo implement when actual image file deleted externally, redownload
+
 def setup_testing():
     # print('Setting up...')
     if os.path.exists('cols'):

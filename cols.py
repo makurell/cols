@@ -311,7 +311,8 @@ class ColFile:
                             for f in loc[1]:
                                 if DEBUG:
                                     if not os.path.isfile(item_path+f): print(loc[0]+f+" >> "+item_path+f)
-                                cpath(item_path)
+                                cpath(item_path+os.path.split(f)[0])
+
                                 try:
                                     shutil.copyfile(loc[0]+f,item_path+f) # copy to destination
                                 except FileNotFoundError:
@@ -333,7 +334,7 @@ class ColFile:
             for loc in llocs:
                 needed=False
                 for item in self.get_items():
-                    if item.parent.get_path()==loc[0]:
+                    if item.parent.get_path()==loc[0] and hash_string(item.get_remote())==hsh:
                         needed=True
                         break
                 if not needed:
