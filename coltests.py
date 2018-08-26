@@ -140,8 +140,28 @@ class TestRendering(unittest.TestCase):
             "       \n", False)
         self.assertFalse(os.path.isfile('cols/a/1/a/moe.jpeg'), "top file removed")
         self.assertFalse(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file removed")
+        # create new at bottom (reset)
+        run("---\n"
+            "- a - anime\n"
+            "   - 1 - 1\n"
+            "       - a\n"
+            "           \n"
+            "   - 2 - 2\n"
+            "       https://upload.wikimedia.org/wikipedia/commons/4/43/Chara04.png moe\n", False)
+        self.assertFalse(os.path.isfile('cols/a/1/a/moe.jpeg'), "top file removed")
+        self.assertTrue(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file exists")
 
-        #todo implement when actual image file deleted externally, redownload
+    def test_5_redownload(self):
+        os.remove('cols/a/2/moe.jpeg')
+        run("---\n"
+            "- a - anime\n"
+            "   - 1 - 1\n"
+            "       - a\n"
+            "           \n"
+            "   - 2 - 2\n"
+            "       https://upload.wikimedia.org/wikipedia/commons/4/43/Chara04.png moe\n", False)
+        self.assertFalse(os.path.isfile('cols/a/1/a/moe.jpeg'), "top file does not exist")
+        self.assertTrue(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file exists")
 
 def setup_testing():
     # print('Setting up...')
