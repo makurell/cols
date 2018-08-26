@@ -163,7 +163,10 @@ class ColSection:
 
     #region serialisation
     def get_name(self,name_version=0):
-        return re.sub("\([\s\S]*\)","",self.parts[name_version]).strip().replace(" ","-")
+        try:
+            return re.sub("\([\s\S]*\)","",self.parts[name_version]).strip().replace(" ","-")
+        except:
+            return re.sub("\([\s\S]*\)","",self.parts[0]).strip().replace(" ","-")
 
     def get_path(self, name_version=0):
         path_list = [self.get_name(name_version=name_version)]
@@ -311,7 +314,7 @@ class ColFile:
                                 try:
                                     shutil.copyfile(loc[0]+f,item_path+f) # copy to destination
                                 except FileNotFoundError:
-                                    # the src file (likely) doesn't exist
+                                    # the src file (most likely) doesn't exist
                                     break
                             else:
                                 needs_appending=True
@@ -325,7 +328,6 @@ class ColFile:
                                 item.skip_render=True # if loop was never broken (i.e: src file exists)
                 i+=1
 
-        # todo fix deleting item and re-adding
         for hsh,llocs in list(loc_items):
             for loc in llocs:
                 needed=False

@@ -89,6 +89,58 @@ class TestRendering(unittest.TestCase):
         self.assertFalse(os.path.isfile('cols/a/1/a/moe.jpeg'), "top file removed")
         self.assertTrue(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file exists")
 
+    def test_4_delete(self):
+        # delete
+        run("---\n"
+            "- a - anime\n"
+            "   - 1 - 1\n"
+            "       - a\n"
+            "           \n"
+            "   - 2 - 2\n"
+            "       \n", False)
+        self.assertFalse(os.path.isfile('cols/a/1/a/moe.jpeg'), "top file removed")
+        self.assertFalse(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file removed")
+        # create new at top
+        run("---\n"
+            "- a - anime\n"
+            "   - 1 - 1\n"
+            "       - a\n"
+            "           https://upload.wikimedia.org/wikipedia/commons/4/43/Chara04.png moe\n"
+            "   - 2 - 2\n"
+            "       \n", False)
+        self.assertTrue(os.path.isfile('cols/a/1/a/moe.jpeg'), "top file exists")
+        self.assertFalse(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file removed")
+        # delete
+        run("---\n"
+            "- a - anime\n"
+            "   - 1 - 1\n"
+            "       - a\n"
+            "           \n"
+            "   - 2 - 2\n"
+            "       \n", False)
+        self.assertFalse(os.path.isfile('cols/a/1/a/moe.jpeg'), "top file removed")
+        self.assertFalse(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file removed")
+        # create two copies at once
+        run("---\n"
+            "- a - anime\n"
+            "   - 1 - 1\n"
+            "       - a\n"
+            "           https://upload.wikimedia.org/wikipedia/commons/4/43/Chara04.png moe\n"
+            "   - 2 - 2\n"
+            "       https://upload.wikimedia.org/wikipedia/commons/4/43/Chara04.png moe\n", False)
+        self.assertTrue(os.path.isfile('cols/a/1/a/moe.jpeg'), "top file exists")
+        self.assertTrue(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file exists")
+        # delete both
+        run("---\n"
+            "- a - anime\n"
+            "   - 1 - 1\n"
+            "       - a\n"
+            "           \n"
+            "   - 2 - 2\n"
+            "       \n", False)
+        self.assertFalse(os.path.isfile('cols/a/1/a/moe.jpeg'), "top file removed")
+        self.assertFalse(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file removed")
+
 def setup_testing():
     # print('Setting up...')
     if os.path.exists('cols'):
@@ -106,7 +158,7 @@ def setup_testing():
 
 if __name__=='__main__':
     import cols
-    cols.DEBUG = True
+    cols.DEBUG = False
     setup_testing()
 
     unittest.main(verbosity=2)
