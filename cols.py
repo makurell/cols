@@ -27,7 +27,7 @@ def get_parts(s,skip_start=True):
 
 def get_renderer(item):
     for hook in builders.hooks:
-        if re.match("^"+hook[0]+"$",item.parent.get_path(1)):
+        if re.match("^"+hook[0]+"$",item.get_remote()):
             try:
                 if hook[1] is not None:
                     return hook[1]
@@ -279,6 +279,7 @@ class ColFile:
                     locs[hsh]=[loc[1]]
                 else:
                     locs[hsh].append(loc[1])
+        #todo remove loc entries which are empty
         self.save_locs(locs)
 
     def render_from_locs(self):
