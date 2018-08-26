@@ -6,7 +6,7 @@ from cols import run
 
 TEST_EXTENT=0
 class TestRendering(unittest.TestCase):
-    def test_1_nochange(self):
+    def test_a_nochange(self):
         run("---\n"
             "- a - anime\n"
             "   - 1 - 1\n"
@@ -16,7 +16,7 @@ class TestRendering(unittest.TestCase):
             "       https://upload.wikimedia.org/wikipedia/commons/4/43/Chara04.png moe\n",False)
         self.assertTrue(os.path.isfile('cols/a/2/moe.jpeg'),"file exists")
 
-    def test_2_move(self):
+    def test_b_move(self):
         # move
         run("---\n"
             "- a - anime\n"
@@ -38,7 +38,7 @@ class TestRendering(unittest.TestCase):
         self.assertTrue(os.path.isfile('cols/a/2/moe.jpeg'), "dest file exists")
         self.assertFalse(os.path.isfile('cols/a/1/a/moe.jpeg'), "src file removed")
 
-    def test_3_copy(self):
+    def test_c_copy(self):
         # copy
         run("---\n"
             "- a - anime\n"
@@ -90,7 +90,7 @@ class TestRendering(unittest.TestCase):
         self.assertFalse(os.path.isfile('cols/a/1/a/moe.jpeg'), "top file removed")
         self.assertTrue(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file exists")
 
-    def test_4_delete(self):
+    def test_d_delete(self):
         # delete
         run("---\n"
             "- a - anime\n"
@@ -152,7 +152,7 @@ class TestRendering(unittest.TestCase):
         self.assertFalse(os.path.isfile('cols/a/1/a/moe.jpeg'), "top file removed")
         self.assertTrue(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file exists")
 
-    def test_5_redownload(self):
+    def test_e_redownload(self):
         return
         os.remove('cols/a/2/moe.jpeg')
         run("---\n"
@@ -165,7 +165,7 @@ class TestRendering(unittest.TestCase):
         self.assertFalse(os.path.isfile('cols/a/1/a/moe.jpeg'), "top file does not exist")
         self.assertTrue(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file exists")
 
-    def test_6_reset(self):
+    def test_f_reset(self):
         if TEST_EXTENT<2: return
         run("---\n"
             "- a - anime\n"
@@ -177,7 +177,7 @@ class TestRendering(unittest.TestCase):
         self.assertFalse(os.path.isfile('cols/a/1/a/moe.jpeg'), "top file does not exist")
         self.assertFalse(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file does not exist")
 
-    def test_7_m(self):
+    def test_g_m(self):
         if TEST_EXTENT<2: return
         run("---\n"
             "- a - anime\n"
@@ -190,7 +190,7 @@ class TestRendering(unittest.TestCase):
         self.assertTrue(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p0.jpg'), "bottom0")
         self.assertTrue(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p1.jpg'), "bottom1")
 
-    def test_8_m_nochange(self):
+    def test_h_m_nochange(self):
         if TEST_EXTENT<2: return
         run("---\n"
             "- a - anime\n"
@@ -203,7 +203,7 @@ class TestRendering(unittest.TestCase):
         self.assertTrue(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p0.jpg'), "bottom0")
         self.assertTrue(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p1.jpg'), "bottom1")
 
-    def test_9_m_move(self):
+    def test_i_m_move(self):
         if TEST_EXTENT<2: return
         # move up
         run("---\n"
@@ -234,7 +234,7 @@ class TestRendering(unittest.TestCase):
         self.assertFalse(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p0.jpg'), "top0")
         self.assertFalse(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p1.jpg'), "top1")
 
-    def test_10_m_copy(self):
+    def test_j_m_copy(self):
         if TEST_EXTENT<2: return
         # copy
         run("---\n"
@@ -307,7 +307,7 @@ class TestRendering(unittest.TestCase):
         self.assertFalse(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p0.jpg'), "top0")
         self.assertFalse(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p1.jpg'), "top1")
 
-    def test_11_m_delete(self):
+    def test_k_m_delete(self):
         if TEST_EXTENT <3: return
         # delete
         run("---\n"
