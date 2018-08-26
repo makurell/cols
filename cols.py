@@ -288,11 +288,13 @@ class ColFile:
             return {}
         loc_items=copy.deepcopy(locs).items()
 
+        # self_items=copy.deepcopy(self.get_items())
         # non_dels=[] # list of ones to not delete
         for hsh,llocs in loc_items:
             i=0
             for loc in llocs:
                 for item in self.get_items():
+                    if item.skip_render:continue
                     curhash = hash_string(item.get_remote())
                     if hsh==curhash:
                         item_path=item.parent.get_path()
@@ -312,11 +314,18 @@ class ColFile:
                                     # the src file (likely) doesn't exist
                                     break
                             else:
-                                locs[hsh].append((item_path,loc[1]))
+                                needs_appending=True
+                                for xloc in locs[hsh]:
+                                    if xloc[0]==item_path:
+                                        needs_appending=False
+                                        break
+                                if needs_appending:
+                                    locs[hsh].append((item_path,loc[1]))
                                 # locs[hsh][i][0]=item_path
                                 item.skip_render=True # if loop was never broken (i.e: src file exists)
                 i+=1
 
+        # todo fix deleting item and re-adding
         for hsh,llocs in list(loc_items):
             for loc in llocs:
                 needed=False
@@ -339,23 +348,6 @@ class ColFile:
                             pass
 
                     if DEBUG: print("Deleted: "+loc[0]+(loc[1][0] if rem_dir != '' else rem_dir))
-
-        # for hsh,llocs in list(loc_items):
-        #     for loc in llocs:
-        #         if hsh not in non_dels:
-        #             #todo fix deleting item and re-adding
-        #             # delete orig (because moved, etc)
-        #             for f in loc[1]:
-        #                 os.remove(loc[0]+f) # del file
-        #
-        #             rem_dir=os.path.split(loc[1][0])[0]
-        #             if rem_dir != '':
-        #                 try:
-        #                     os.rmdir(loc[0]+rem_dir) # del dir
-        #                 except OSError:
-        #                     pass
-        #
-        #             if DEBUG: print("Deleted: "+loc[0]+(loc[1][0] if rem_dir != '' else rem_dir))
 
         return locs
 
