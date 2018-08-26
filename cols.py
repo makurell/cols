@@ -71,6 +71,9 @@ class ColItem:
         d={}
         d['data']=save_ret[1]
         d['timestamp']=int(round(time.time() * 1000))
+        d['name']=self.get_name()
+        d['source']=self.get_remote()
+
         return self.parent.get_path(), save_ret[0], d
 
     #region serialisation
@@ -85,7 +88,7 @@ class ColItem:
                 if sibling is self:
                     break
                 own_index+=1
-            return str(own_index)
+            return str(own_index+1)
 
     def get_remote(self):
         return self.parts[0]
