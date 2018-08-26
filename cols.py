@@ -145,7 +145,7 @@ class ColSection:
     def render(self):
         ret=[]
         cpath(self.get_path())
-        if DEBUG: print(self.get_path(1))
+        # if DEBUG: print(self.get_path(1))
         for section in self.sections:
             ret.extend(section.render())
         for item in self.items:
@@ -289,7 +289,7 @@ class ColFile:
         loc_items=copy.deepcopy(locs).items()
 
         non_dels=[] # list of ones to not delete
-        for k,v in locs.items():
+        for k,v in loc_items:
             item_list=self.get_items()
             for item in item_list:
                 curhash = hash_string(item.get_remote())
