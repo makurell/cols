@@ -106,7 +106,7 @@ def setup_testing():
 
 if __name__=='__main__':
     import cols
-    cols.DEBUG = False
+    cols.DEBUG = True
     setup_testing()
 
     unittest.main(verbosity=2)
