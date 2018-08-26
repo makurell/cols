@@ -67,12 +67,25 @@ class ColItem:
 
     def render(self):
         if DEBUG: print(self.get_remote())
-        save=get_renderer(self)
-        return (self.parent.get_path(), *save(self, self.parent.get_path()))
+        save_ret=get_renderer(self)(self, self.parent.get_path())
+        d={}
+        d['data']=save_ret[1]
+        d['timestamp']=int(round(time.time() * 1000))
+        return self.parent.get_path(), save_ret[0], d
 
     #region serialisation
     def get_name(self):
-        return self.parts[1]
+        try:
+            ret = self.parts[1]
+            if ret is None: raise IndexError
+            else: return ret
+        except IndexError:
+            own_index=0
+            for sibling in self.parent.items:
+                if sibling is self:
+                    break
+                own_index+=1
+            return str(own_index)
 
     def get_remote(self):
         return self.parts[0]
@@ -307,7 +320,7 @@ class ColFile:
                             for f in loc[1]:
                                 if not os.path.isfile(loc[0]+f):
                                     files_exist=False
-                                    break
+                                    break # NB: case is not covered: where you rename, it will not delete the old  file
                             if files_exist:
                                 if DEBUG: print("Already correct: " + loc[0] + loc[1][0]+'-'+loc[1][-1])
                                 item.skip_render=True

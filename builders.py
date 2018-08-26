@@ -21,8 +21,8 @@ def write_img(remote,local):
 
 def default_render(item: ColItem, base_path):
     path=item.get_name()+'.jpeg'
-    write_img(item.get_remote(),base_path+path) #todo case where no name given
-    return [path],"test"
+    write_img(item.get_remote(),base_path+path)
+    return [path],{}
 #endregion
 #region pixiv
 api=AppPixivAPI()
@@ -65,7 +65,7 @@ def pixiv_render(item,base_path):
         name=str(detail['illust']['title']) + '_' + str(illust_id) + os.path.basename(url)
         ret.append(path+'/'+name)
         api.download(url, name=name, path=os.path.abspath(base_path+path))
-    return ret, "test"
+    return ret, {}
 #endregion
 
 hooks=[
