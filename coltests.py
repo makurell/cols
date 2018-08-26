@@ -4,7 +4,7 @@ import unittest
 import builders
 from cols import run
 
-DO_FULL=True
+TEST_EXTENT=0
 class TestRendering(unittest.TestCase):
     def test_1_nochange(self):
         run("---\n"
@@ -166,7 +166,7 @@ class TestRendering(unittest.TestCase):
         self.assertTrue(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file exists")
 
     def test_6_reset(self):
-        if not DO_FULL: return
+        if TEST_EXTENT<2: return
         run("---\n"
             "- a - anime\n"
             "   - 1 - 1\n"
@@ -178,7 +178,7 @@ class TestRendering(unittest.TestCase):
         self.assertFalse(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file does not exist")
 
     def test_7_m(self):
-        if not DO_FULL: return
+        if TEST_EXTENT<2: return
         run("---\n"
             "- a - anime\n"
             "   - 1 - 1\n"
@@ -189,6 +189,50 @@ class TestRendering(unittest.TestCase):
         self.assertTrue(os.path.isdir('cols/a/2/Lpip_6996493/'),'dir')
         self.assertTrue(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p0.jpg'), "bottom0")
         self.assertTrue(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p1.jpg'), "bottom1")
+
+    def test_7_m_nochange(self):
+        if TEST_EXTENT<2: return
+        run("---\n"
+            "- a - anime\n"
+            "   - 1 - 1\n"
+            "       - a\n"
+            "           \n"
+            "   - 2 - 2\n"
+            "       https://www.pixiv.net/member_illust.php?mode=medium&illust_id=68427137\n", False)
+        self.assertTrue(os.path.isdir('cols/a/2/Lpip_6996493/'),'dir')
+        self.assertTrue(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p0.jpg'), "bottom0")
+        self.assertTrue(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p1.jpg'), "bottom1")
+
+    def test_7_m_move(self):
+        if TEST_EXTENT<2: return
+        # move up
+        run("---\n"
+            "- a - anime\n"
+            "   - 1 - 1\n"
+            "       - a\n"
+            "           https://www.pixiv.net/member_illust.php?mode=medium&illust_id=68427137\n"
+            "   - 2 - 2\n"
+            "       \n", False)
+        self.assertFalse(os.path.isdir('cols/a/2/Lpip_6996493/'),'dir')
+        self.assertFalse(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p0.jpg'), "bottom0")
+        self.assertFalse(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p1.jpg'), "bottom1")
+        self.assertTrue(os.path.isdir('cols/a/1/a/Lpip_6996493/'), 'dir')
+        self.assertTrue(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p0.jpg'), "bottom0")
+        self.assertTrue(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p1.jpg'), "bottom1")
+        # and back
+        run("---\n"
+            "- a - anime\n"
+            "   - 1 - 1\n"
+            "       - a\n"
+            "           \n"
+            "   - 2 - 2\n"
+            "       https://www.pixiv.net/member_illust.php?mode=medium&illust_id=68427137\n", False)
+        self.assertTrue(os.path.isdir('cols/a/2/Lpip_6996493/'), 'dir')
+        self.assertTrue(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p0.jpg'), "bottom0")
+        self.assertTrue(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p1.jpg'), "bottom1")
+        self.assertFalse(os.path.isdir('cols/a/1/a/Lpip_6996493/'), 'dir')
+        self.assertFalse(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p0.jpg'), "bottom0")
+        self.assertFalse(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p1.jpg'), "bottom1")
 
 def setup_testing():
     # print('Setting up...')
@@ -206,6 +250,7 @@ def setup_testing():
     # print('[READY]')
 
 if __name__=='__main__':
+    TEST_EXTENT=3
     import cols
     cols.DEBUG = False
     setup_testing()
