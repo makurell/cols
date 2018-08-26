@@ -347,7 +347,7 @@ class ColFile:
                                         needs_appending=False
                                         break
                                 if needs_appending:
-                                    locs[hsh].append((item_path,loc[1]))
+                                    locs[hsh].append((item_path,loc[1],loc[2]))
                                 item.skip_render=True # if loop was never broken (i.e: src file exists)
                 i+=1
 
