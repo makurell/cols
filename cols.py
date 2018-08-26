@@ -288,51 +288,74 @@ class ColFile:
             return {}
         loc_items=copy.deepcopy(locs).items()
 
-        non_dels=[] # list of ones to not delete
-        for k,vs in loc_items:
+        # non_dels=[] # list of ones to not delete
+        for hsh,llocs in loc_items:
             i=0
-            for v in vs:
-                item_list=self.get_items()
-                for item in item_list:
+            for loc in llocs:
+                for item in self.get_items():
                     curhash = hash_string(item.get_remote())
-                    if k==curhash:
+                    if hsh==curhash:
                         item_path=item.parent.get_path()
-                        if item_path==v[0]:
+                        if item_path==loc[0]:
                             # already in correct place
-                            non_dels.append(k)
-                            if DEBUG: print("Already correct: " + v[0] + v[1][0]+'-'+v[1][-1])
+                            # non_dels.append(hsh)
+                            if DEBUG: print("Already correct: " + loc[0] + loc[1][0]+'-'+loc[1][-1])
                             item.skip_render=True
                         else:
-                            for f in v[1]:
+                            for f in loc[1]:
                                 if DEBUG:
-                                    if not os.path.isfile(item_path+f): print(v[0]+f+" >> "+item_path+f)
+                                    if not os.path.isfile(item_path+f): print(loc[0]+f+" >> "+item_path+f)
                                 cpath(item_path)
                                 try:
-                                    shutil.copyfile(v[0]+f,item_path+f) # copy to destination
+                                    shutil.copyfile(loc[0]+f,item_path+f) # copy to destination
                                 except FileNotFoundError:
                                     # the src file (likely) doesn't exist
                                     break
                             else:
-                                locs[k][i][0]=item_path
+                                locs[hsh].append((item_path,loc[1]))
+                                # locs[hsh][i][0]=item_path
                                 item.skip_render=True # if loop was never broken (i.e: src file exists)
                 i+=1
 
-        for k,vs in list(loc_items):
-            for v in vs:
-                if k not in non_dels:
-                    #todo fix deleting item and re-adding
-                    # delete orig (because moved, etc)
-                    for f in v[1]:
-                        os.remove(v[0]+f) # del file
+        for hsh,llocs in list(loc_items):
+            for loc in llocs:
+                needed=False
+                for item in self.get_items():
+                    if item.parent.get_path()==loc[0]:
+                        needed=True
+                        break
+                if not needed:
+                    # delete orig
+                    locs[hsh].remove(loc) # del from locdict
 
-                    rem_dir=os.path.split(v[1][0])[0]
+                    for f in loc[1]:
+                        os.remove(loc[0]+f) # del file
+
+                    rem_dir = os.path.split(loc[1][0])[0]
                     if rem_dir != '':
                         try:
-                            os.rmdir(v[0]+rem_dir) # del dir
+                            os.rmdir(loc[0]+rem_dir) # del dir
                         except OSError:
                             pass
 
-                    if DEBUG: print("Deleted: "+v[0]+(v[1][0] if rem_dir != '' else rem_dir))
+                    if DEBUG: print("Deleted: "+loc[0]+(loc[1][0] if rem_dir != '' else rem_dir))
+
+        # for hsh,llocs in list(loc_items):
+        #     for loc in llocs:
+        #         if hsh not in non_dels:
+        #             #todo fix deleting item and re-adding
+        #             # delete orig (because moved, etc)
+        #             for f in loc[1]:
+        #                 os.remove(loc[0]+f) # del file
+        #
+        #             rem_dir=os.path.split(loc[1][0])[0]
+        #             if rem_dir != '':
+        #                 try:
+        #                     os.rmdir(loc[0]+rem_dir) # del dir
+        #                 except OSError:
+        #                     pass
+        #
+        #             if DEBUG: print("Deleted: "+loc[0]+(loc[1][0] if rem_dir != '' else rem_dir))
 
         return locs
 
