@@ -308,7 +308,7 @@ class ColFile:
                             try:
                                 shutil.copyfile(v[0]+f,item_path+f) # copy to destination
                             except FileNotFoundError:
-                                # the src file (likely) doesn't exist - will need to be rendered again
+                                # the src file (likely) doesn't exist
                                 break
                         else:
                             locs[k][0]=item_path
@@ -316,6 +316,7 @@ class ColFile:
 
         for k,v in list(loc_items):
             if k not in non_dels:
+                #todo fix deleting item and re-adding
                 # delete orig (because moved, etc)
                 for f in v[1]:
                     os.remove(v[0]+f) # del file
