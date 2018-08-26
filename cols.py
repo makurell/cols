@@ -377,7 +377,7 @@ class ColFile:
         return self.to_string()
     #endregion
 
-if __name__=="__main__":
+def run():
     start_time = time.time()
     cf = ColFile("data.col")
     cf.parse()
@@ -386,3 +386,5 @@ if __name__=="__main__":
     # print(cf.serialise())
     print("time elapsed: "+str(time.time() - start_time)+'s')
 
+if __name__=='__main__':
+    run()
