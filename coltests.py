@@ -153,7 +153,6 @@ class TestRendering(unittest.TestCase):
         self.assertTrue(os.path.isfile('cols/a/2/moe.jpeg'), "bottom file exists")
 
     def test_e_redownload(self):
-        return
         os.remove('cols/a/2/moe.jpeg')
         run("---\n"
             "- a - anime\n"
@@ -396,7 +395,7 @@ def setup_testing():
     # print('[READY]')
 
 if __name__=='__main__':
-    TEST_EXTENT=3
+    TEST_EXTENT=2
     import cols
     cols.DEBUG = False
     setup_testing()
