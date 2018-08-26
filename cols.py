@@ -302,8 +302,16 @@ class ColFile:
                         item_path=item.parent.get_path()
                         if item_path==loc[0]:
                             # already in correct place
-                            if DEBUG: print("Already correct: " + loc[0] + loc[1][0]+'-'+loc[1][-1])
-                            item.skip_render=True
+                            files_exist=True
+                            for f in loc[1]:
+                                if not os.path.isfile(loc[0]+f):
+                                    files_exist=False
+                                    break
+                            if files_exist:
+                                if DEBUG: print("Already correct: " + loc[0] + loc[1][0]+'-'+loc[1][-1])
+                                item.skip_render=True
+                            else:
+                                del locs[curhash][i]
                         else:
                             for f in loc[1]:
                                 if DEBUG:
