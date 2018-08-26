@@ -377,14 +377,18 @@ class ColFile:
         return self.to_string()
     #endregion
 
-def run():
+def run(raw=None,show_time=True):
     start_time = time.time()
-    cf = ColFile("data.col")
-    cf.parse()
+    if raw is None:
+        cf = ColFile("data.col")
+        cf.parse()
+    else:
+        cf=ColFile("data.temp.col")
+        cf.parse(raw)
     # print(cf.serialise('\t\t'))
     cf.render()
     # print(cf.serialise())
-    print("time elapsed: "+str(time.time() - start_time)+'s')
+    if show_time: print("time elapsed: "+str(time.time() - start_time)+'s')
 
 if __name__=='__main__':
     run()
