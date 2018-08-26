@@ -1,6 +1,6 @@
 # col stuff
 *.proc.col
-data.json
+locs.json
 cols/
 
 # User-specific stuff

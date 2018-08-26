@@ -3,6 +3,8 @@ import json
 import re
 import os
 import errno
+import shutil
+
 import builders
 from io import StringIO
 
@@ -36,12 +38,23 @@ def hash_file(file_path):
         for chunk in iter(lambda: f.read(4096),b''):
             m.update(chunk)
     return m.hexdigest()
+
+def hash_string(string):
+    return hashlib.sha256(str(string).encode('utf-8')).hexdigest()
+
+def cpath(path):
+    try:
+        os.makedirs(path)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
 #endregion
 
 class ColItem:
     def __init__(self,parent):
         self.parts=[]
         self.parent=parent
+        self.skip_render=False
 
     def parse(self,raw):
         for part in raw.strip().split(' '):
@@ -129,17 +142,21 @@ class ColSection:
 
     def render(self):
         ret=[]
-        path=self.get_path()
-        try:
-            os.makedirs(path)
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
+        cpath(self.get_path())
         if DEBUG: print(self.get_path(1))
         for section in self.sections:
             ret.extend(section.render())
         for item in self.items:
-            ret.append((item,item.render()))
+            if not item.skip_render:
+                ret.append((item,item.render()))
+        return ret
+
+    def get_items(self):
+        ret=[]
+        for section in self.sections:
+            ret.extend(section.get_items())
+        for item in self.items:
+            ret.append(item)
         return ret
 
     #region serialisation
@@ -246,23 +263,73 @@ class ColFile:
                                 buf+=innerline
 
     def render(self):
-        #todo build from saved locs
+        self.render_from_locs()
 
         #render everything and build locdict
         locs={}
         for section in self.sections:
             for loc in section.render():
-                hash = hashlib.sha256(str(loc[0].get_remote()).encode('utf-8')).hexdigest()
-                if hash not in locs:
-                    locs[hash]=loc[1]
+                hsh = hash_string(loc[0].get_remote().encode('utf-8'))
+                if hsh not in locs:
+                    locs[hsh]=loc[1]
                 else:
-                    # print("LOCAL MANAGER SHALL HANDLE DUP: "+loc[0].get_remote()+" - "+str(loc[1]))
                     pass
         self.save_locs(locs)
 
+    def render_from_locs(self):
+        #read locs
+        locs=None
+        with open('data.json','r') as f:
+            locs=json.loads(f.read())
+
+        # item: ColItem
+        # for item in self.get_items():
+        #     curhash = hash_string(item.get_remote())
+        #     for k,v in locs.items():
+        #         if k==curhash:
+        #             # successful hash match!
+        #             pass
+        #             # if item.parent.get_path()==
+
+        non_dels=[] # list of ones to not delete
+        for k,v in locs.items():
+            item_list=self.get_items()
+            for item in item_list:
+                curhash = hash_string(item.get_remote())
+                if k==curhash:
+                    item_path=item.parent.get_path()
+                    if item_path==v[0]:
+                        # already in correct place
+                        non_dels.append(k)
+                        if DEBUG: print("Already correct: " + v[0] + v[1][0]+'-'+v[1][-1])
+                    else:
+                        for f in v[1]:
+                            cpath(item_path)
+                            shutil.copyfile(v[0]+f,item_path+f) # copy to destination
+                            if DEBUG: print("Copied: "+v[0]+f+" >> "+item_path+f)
+                    item.skip_render=True
+
+        for k,v in locs.items():
+            if k not in non_dels:
+                # delete orig (because moved, etc)
+                for f in v[1]:
+                    os.remove(v[0]+f) # del file
+
+                rem_dir=os.path.split(v[1][0])[0]
+                if rem_dir != '':
+                    shutil.rmtree(rem_dir) # del dir
+
+                if DEBUG: print("Deleted: "+v[0]+(v[1][0] if rem_dir != '' else rem_dir))
+
     def save_locs(self, locs):
-        # with open('data.json')
-        pass
+        with open('locs.json','w') as f:
+            f.write(json.dumps(locs))
+
+    def get_items(self):
+        ret=[]
+        for section in self.sections:
+            ret.extend(section.get_items())
+        return ret
 
     #region serialisation
     def get_name(self,name_version=0):
