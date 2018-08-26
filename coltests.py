@@ -234,7 +234,7 @@ class TestRendering(unittest.TestCase):
         self.assertFalse(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p0.jpg'), "top0")
         self.assertFalse(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p1.jpg'), "top1")
 
-    def test_9_m_copy(self):
+    def test_10_m_copy(self):
         if TEST_EXTENT<2: return
         # copy
         run("---\n"
@@ -303,6 +303,79 @@ class TestRendering(unittest.TestCase):
         self.assertTrue(os.path.isdir('cols/a/2/Lpip_6996493/'), 'dir')
         self.assertTrue(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p0.jpg'), "bottom0")
         self.assertTrue(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p1.jpg'), "bottom1")
+        self.assertFalse(os.path.isdir('cols/a/1/a/Lpip_6996493/'), 'dir')
+        self.assertFalse(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p0.jpg'), "top0")
+        self.assertFalse(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p1.jpg'), "top1")
+
+    def test_11_m_delete(self):
+        if TEST_EXTENT <3: return
+        # delete
+        run("---\n"
+            "- a - anime\n"
+            "   - 1 - 1\n"
+            "       - a\n"
+            "           \n"
+            "   - 2 - 2\n"
+            "       \n", False)
+        self.assertFalse(os.path.isdir('cols/a/2/Lpip_6996493/'), 'dir')
+        self.assertFalse(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p0.jpg'), "bottom0")
+        self.assertFalse(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p1.jpg'), "bottom1")
+        self.assertFalse(os.path.isdir('cols/a/1/a/Lpip_6996493/'), 'dir')
+        self.assertFalse(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p0.jpg'), "top0")
+        self.assertFalse(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p1.jpg'), "top1")
+        # create new copy at top
+        run("---\n"
+            "- a - anime\n"
+            "   - 1 - 1\n"
+            "       - a\n"
+            "           https://www.pixiv.net/member_illust.php?mode=medium&illust_id=68427137\n"
+            "   - 2 - 2\n"
+            "       \n", False)
+        self.assertFalse(os.path.isdir('cols/a/2/Lpip_6996493/'), 'dir')
+        self.assertFalse(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p0.jpg'), "bottom0")
+        self.assertFalse(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p1.jpg'), "bottom1")
+        self.assertTrue(os.path.isdir('cols/a/1/a/Lpip_6996493/'), 'dir')
+        self.assertTrue(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p0.jpg'), "top0")
+        self.assertTrue(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p1.jpg'), "top1")
+        # delete
+        run("---\n"
+            "- a - anime\n"
+            "   - 1 - 1\n"
+            "       - a\n"
+            "           \n"
+            "   - 2 - 2\n"
+            "       \n", False)
+        self.assertFalse(os.path.isdir('cols/a/2/Lpip_6996493/'), 'dir')
+        self.assertFalse(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p0.jpg'), "bottom0")
+        self.assertFalse(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p1.jpg'), "bottom1")
+        self.assertFalse(os.path.isdir('cols/a/1/a/Lpip_6996493/'), 'dir')
+        self.assertFalse(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p0.jpg'), "top0")
+        self.assertFalse(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p1.jpg'), "top1")
+        # create 2 new copies at once
+        run("---\n"
+            "- a - anime\n"
+            "   - 1 - 1\n"
+            "       - a\n"
+            "           https://www.pixiv.net/member_illust.php?mode=medium&illust_id=68427137\n"
+            "   - 2 - 2\n"
+            "       https://www.pixiv.net/member_illust.php?mode=medium&illust_id=68427137\n", False)
+        self.assertTrue(os.path.isdir('cols/a/2/Lpip_6996493/'), 'dir')
+        self.assertTrue(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p0.jpg'), "bottom0")
+        self.assertTrue(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p1.jpg'), "bottom1")
+        self.assertTrue(os.path.isdir('cols/a/1/a/Lpip_6996493/'), 'dir')
+        self.assertTrue(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p0.jpg'), "top0")
+        self.assertTrue(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p1.jpg'), "top1")
+        # delete both
+        run("---\n"
+            "- a - anime\n"
+            "   - 1 - 1\n"
+            "       - a\n"
+            "           \n"
+            "   - 2 - 2\n"
+            "       \n", False)
+        self.assertFalse(os.path.isdir('cols/a/2/Lpip_6996493/'), 'dir')
+        self.assertFalse(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p0.jpg'), "bottom0")
+        self.assertFalse(os.path.isfile('cols/a/2/Lpip_6996493/★_6842713768427137_p1.jpg'), "bottom1")
         self.assertFalse(os.path.isdir('cols/a/1/a/Lpip_6996493/'), 'dir')
         self.assertFalse(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p0.jpg'), "top0")
         self.assertFalse(os.path.isfile('cols/a/1/a/Lpip_6996493/★_6842713768427137_p1.jpg'), "top1")
