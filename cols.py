@@ -4,6 +4,7 @@ import re
 import os
 import errno
 import shutil
+import time
 
 import builders
 from io import StringIO
@@ -263,13 +264,13 @@ class ColFile:
                                 buf+=innerline
 
     def render(self):
-        self.render_from_locs()
+        locs=self.render_from_locs()
+        # locs={}
 
         #render everything and build locdict
-        locs={}
         for section in self.sections:
             for loc in section.render():
-                hsh = hash_string(loc[0].get_remote().encode('utf-8'))
+                hsh = hash_string(loc[0].get_remote())
                 if hsh not in locs:
                     locs[hsh]=loc[1]
                 else:
@@ -279,17 +280,11 @@ class ColFile:
     def render_from_locs(self):
         #read locs
         locs=None
-        with open('data.json','r') as f:
-            locs=json.loads(f.read())
-
-        # item: ColItem
-        # for item in self.get_items():
-        #     curhash = hash_string(item.get_remote())
-        #     for k,v in locs.items():
-        #         if k==curhash:
-        #             # successful hash match!
-        #             pass
-        #             # if item.parent.get_path()==
+        try:
+            with open('locs.json','r') as f:
+                locs=json.loads(f.read())
+        except FileNotFoundError:
+            return {}
 
         non_dels=[] # list of ones to not delete
         for k,v in locs.items():
@@ -302,12 +297,19 @@ class ColFile:
                         # already in correct place
                         non_dels.append(k)
                         if DEBUG: print("Already correct: " + v[0] + v[1][0]+'-'+v[1][-1])
+                        item.skip_render=True
                     else:
                         for f in v[1]:
                             cpath(item_path)
-                            shutil.copyfile(v[0]+f,item_path+f) # copy to destination
-                            if DEBUG: print("Copied: "+v[0]+f+" >> "+item_path+f)
-                    item.skip_render=True
+                            try:
+                                shutil.copyfile(v[0]+f,item_path+f) # copy to destination
+                            except FileNotFoundError:
+                                # the src file (likely) doesn't exist - will need to be rendered again
+                                break
+                            if DEBUG:
+                                if not os.path.isfile(item_path+f): print(v[0]+f+" >> "+item_path+f)
+                        else:
+                            item.skip_render=True # if loop was never broken (i.e: src file exists)
 
         for k,v in locs.items():
             if k not in non_dels:
@@ -317,9 +319,14 @@ class ColFile:
 
                 rem_dir=os.path.split(v[1][0])[0]
                 if rem_dir != '':
-                    shutil.rmtree(rem_dir) # del dir
+                    try:
+                        os.rmdir(v[0]+rem_dir) # del dir
+                    except OSError:
+                        pass
 
                 if DEBUG: print("Deleted: "+v[0]+(v[1][0] if rem_dir != '' else rem_dir))
+
+        return locs
 
     def save_locs(self, locs):
         with open('locs.json','w') as f:
@@ -367,9 +374,11 @@ class ColFile:
     #endregion
 
 if __name__=="__main__":
+    start_time = time.time()
     cf = ColFile("data.col")
     cf.parse()
     # print(cf.serialise('\t\t'))
     cf.render()
     # print(cf.serialise())
+    print("time elapsed: "+str(time.time() - start_time)+'s')
 
