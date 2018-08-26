@@ -292,8 +292,6 @@ class ColFile:
             return {}
         loc_items=copy.deepcopy(locs).items()
 
-        # self_items=copy.deepcopy(self.get_items())
-        # non_dels=[] # list of ones to not delete
         for hsh,llocs in loc_items:
             i=0
             for loc in llocs:
@@ -304,7 +302,6 @@ class ColFile:
                         item_path=item.parent.get_path()
                         if item_path==loc[0]:
                             # already in correct place
-                            # non_dels.append(hsh)
                             if DEBUG: print("Already correct: " + loc[0] + loc[1][0]+'-'+loc[1][-1])
                             item.skip_render=True
                         else:
@@ -326,7 +323,6 @@ class ColFile:
                                         break
                                 if needs_appending:
                                     locs[hsh].append((item_path,loc[1]))
-                                # locs[hsh][i][0]=item_path
                                 item.skip_render=True # if loop was never broken (i.e: src file exists)
                 i+=1
 
@@ -408,7 +404,6 @@ def run(raw=None,show_time=True):
     else:
         cf=ColFile("data.temp.col")
         cf.parse(raw)
-    # print(cf.serialise('\t\t'))
     cf.render()
     # print(cf.serialise())
     if show_time: print("time elapsed: "+str(time.time() - start_time)+'s')
