@@ -68,7 +68,7 @@ class ColItem:
     def render(self):
         if DEBUG: print(self.get_remote())
         save=get_renderer(self)
-        return self.parent.get_path(), save(self, self.parent.get_path())
+        return (self.parent.get_path(), *save(self, self.parent.get_path()))
 
     #region serialisation
     def get_name(self):
@@ -269,6 +269,7 @@ class ColFile:
 
     def render(self):
         locs=self.render_from_locs()
+        #todo add data to locs as well
         # locs={}
 
         #render everything and build locdict
