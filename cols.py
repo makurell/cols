@@ -6,6 +6,7 @@ import os
 import errno
 import shutil
 import time
+import click
 
 import builders
 from io import StringIO
@@ -417,7 +418,7 @@ class ColFile:
         return self.to_string()
     #endregion
 
-def run(raw=None,show_time=True):
+def internal_run(raw=None, show_time=True):
     start_time = time.time()
     if raw is None:
         cf = ColFile("data.col")
@@ -428,6 +429,29 @@ def run(raw=None,show_time=True):
     cf.render()
     # print(cf.serialise())
     if show_time:
+        if VERBOSITY>=1: print("time elapsed: "+str(time.time() - start_time)+'s')
+
+@click.command()
+@click.argument('file',default='data.col',type=click.Path(exists=True))
+@click.option('--base','-b',default='cols',help="base path for output")
+@click.option('--verbosity','-v',default=1, help='logging verbosity')
+@click.option('--elapsed/--no-elapsed',default=True, help='whether to display elapsed time at the end')
+@click.option('--pixiv-username',envvar="PIXIV_USERNAME",prompt=True)
+@click.option('--pixiv-password',envvar="PIXIV_PASS",prompt=True, hide_input=True)
+def run(file,base,verbosity,elapsed,pixiv_username,pixiv_password):
+    global VERBOSITY
+    VERBOSITY=verbosity
+
+    builders.pixiv_username=pixiv_username
+    builders.pixiv_password=pixiv_password
+
+    start_time = time.time()
+    cf=ColFile(file)
+    cf.base_path=base
+    cf.parse()
+    cf.render()
+
+    if elapsed:
         if VERBOSITY>=1: print("time elapsed: "+str(time.time() - start_time)+'s')
 
 if __name__=='__main__':

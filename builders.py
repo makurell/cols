@@ -26,6 +26,8 @@ def default_render(item: ColItem, base_path,debug=False):
 #endregion
 #region pixiv
 pixiv_api=None
+pixiv_username=None
+pixiv_password=None
 
 def get_illust_id(url):
     return urlparse.parse_qs(urlparse.urlparse(url).query)['illust_id'][0]
@@ -34,10 +36,7 @@ def pixiv_render(item,base_path,debug=False):
     global pixiv_api
     if pixiv_api is None:
         pixiv_api=AppPixivAPI()
-        if 'PIXIV_USERNAME' in os.environ:
-            pixiv_api.login(os.environ.get('PIXIV_USERNAME'), os.environ.get('PIXIV_PASS'))
-        else:
-            print("Pixiv env variables not set!")
+        pixiv_api.login(pixiv_username,pixiv_password)
 
     illust_id = get_illust_id(item.get_remote())
 
