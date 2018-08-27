@@ -395,9 +395,9 @@ def setup_testing():
     # print('[READY]')
 
 if __name__=='__main__':
-    TEST_EXTENT=2
+    TEST_EXTENT=3
     import cols
-    cols.DEBUG = False
+    cols.VERBOSITY = 0
     setup_testing()
 
     unittest.main(verbosity=2)

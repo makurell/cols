@@ -19,7 +19,7 @@ def write_img(remote,local):
     with Image.open(BytesIO(requests.get(remote).content)) as img:
         img.save(local,quality=75,optimize=True)
 
-def default_render(item: ColItem, base_path):
+def default_render(item: ColItem, base_path,debug=False):
     path=item.get_name()+'.jpeg'
     write_img(item.get_remote(),base_path+path)
     return [path],{}
@@ -33,7 +33,7 @@ else: print("Pixiv env variables not set!")
 def get_illust_id(url):
     return urlparse.parse_qs(urlparse.urlparse(url).query)['illust_id'][0]
 
-def pixiv_render(item,base_path):
+def pixiv_render(item,base_path,debug=False):
     illust_id = get_illust_id(item.get_remote())
 
     detail = api.illust_detail(illust_id)
@@ -65,6 +65,7 @@ def pixiv_render(item,base_path):
         name=str(detail['illust']['title']) + '_' + str(illust_id) + os.path.basename(url)
         ret.append(path+'/'+name)
         api.download(url, name=name, path=os.path.abspath(base_path+path))
+        if debug: print('.',end='',flush=True)
     return ret, {}
 #endregion
 

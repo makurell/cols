@@ -10,10 +10,9 @@ import time
 import builders
 from io import StringIO
 
-# region globals
-DEBUG=True
+VERBOSITY=1
+# region functions
 def get_level(s):
-    # return len(s) - len(s.lstrip()) # just \n produces 1
     return len(re.match(r"^[ \t]*",s).group(0))
 
 def get_parts(s,skip_start=True):
@@ -66,13 +65,14 @@ class ColItem:
             self.parts.append(None)
 
     def render(self):
-        if DEBUG: print(self.get_remote())
-        save_ret=get_renderer(self)(self, self.parent.get_path())
+        if 1 <= VERBOSITY <3: print(self.get_remote() + " ...", end='', flush=True)
+        save_ret=get_renderer(self)(self, self.parent.get_path(),VERBOSITY>=1)
         d={}
         d['data']=save_ret[1]
         d['timestamp']=int(round(time.time() * 1000))
         d['name']=self.get_name()
         d['source']=self.get_remote()
+        if VERBOSITY>=1: print('[OK]')
 
         return self.parent.get_path(), save_ret[0], d
 
@@ -127,7 +127,6 @@ class ColSection:
         with StringIO(raw) as r:
             start_line=r.readline()
             self.parts = get_parts(start_line)
-            # self.depth=get_level(start_line)
 
             while True:
                 line=r.readline()
@@ -157,16 +156,20 @@ class ColSection:
                     item = ColItem(self)
                     item.parse(line)
                     self.items.append(item)
+        if VERBOSITY >= 3: print(str(self)+"\n-------------------------------------------")
 
     def render(self):
         ret=[]
         cpath(self.get_path())
-        # if DEBUG: print(self.get_path(1))
+        if VERBOSITY>=3: print(self.get_path(1))
         for section in self.sections:
             ret.extend(section.render())
         for item in self.items:
+            if VERBOSITY>=3: print('\t'+item.get_remote()+' ...',end='',flush=True)
             if not item.skip_render:
                 ret.append((item,item.render()))
+            else:
+                if VERBOSITY >= 3: print('[skipped]')
         return ret
 
     def get_items(self):
@@ -285,8 +288,6 @@ class ColFile:
 
     def render(self):
         locs=self.render_from_locs()
-        #todo add data to locs as well
-        # locs={}
 
         #render everything and build locdict
         for section in self.sections:
@@ -325,13 +326,13 @@ class ColFile:
                                     files_exist=False
                                     break # NB: case is not covered: where you rename, it will not delete the old  file
                             if files_exist:
-                                if DEBUG: print("Already correct: " + loc[0] + loc[1][0]+'-'+loc[1][-1])
+                                if VERBOSITY>=2: print("Already correct: " + loc[0] + loc[1][0]+'-'+loc[1][-1])
                                 item.skip_render=True
                             else:
                                 del locs[curhash][i]
                         else:
                             for f in loc[1]:
-                                if DEBUG:
+                                if VERBOSITY>=1:
                                     if not os.path.isfile(item_path+f): print(loc[0]+f+" >> "+item_path+f)
                                 cpath(item_path+os.path.split(f)[0])
 
@@ -372,7 +373,7 @@ class ColFile:
                         except OSError:
                             pass
 
-                    if DEBUG: print("Deleted: "+loc[0]+(loc[1][0] if rem_dir != '' else rem_dir))
+                    if VERBOSITY>=1: print("Deleted: "+loc[0]+(loc[1][0] if rem_dir != '' else rem_dir))
 
         return locs
 
@@ -431,7 +432,8 @@ def run(raw=None,show_time=True):
         cf.parse(raw)
     cf.render()
     # print(cf.serialise())
-    if show_time: print("time elapsed: "+str(time.time() - start_time)+'s')
+    if show_time:
+        if VERBOSITY>=1: print("time elapsed: "+str(time.time() - start_time)+'s')
 
 if __name__=='__main__':
     run()
