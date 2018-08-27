@@ -25,18 +25,23 @@ def default_render(item: ColItem, base_path,debug=False):
     return [path],{}
 #endregion
 #region pixiv
-api=AppPixivAPI()
-if 'PIXIV_USERNAME' in os.environ:
-    api.login(os.environ.get('PIXIV_USERNAME'),os.environ.get('PIXIV_PASS'))
-else: print("Pixiv env variables not set!")
+pixiv_api=None
 
 def get_illust_id(url):
     return urlparse.parse_qs(urlparse.urlparse(url).query)['illust_id'][0]
 
 def pixiv_render(item,base_path,debug=False):
+    global pixiv_api
+    if pixiv_api is None:
+        pixiv_api=AppPixivAPI()
+        if 'PIXIV_USERNAME' in os.environ:
+            pixiv_api.login(os.environ.get('PIXIV_USERNAME'), os.environ.get('PIXIV_PASS'))
+        else:
+            print("Pixiv env variables not set!")
+
     illust_id = get_illust_id(item.get_remote())
 
-    detail = api.illust_detail(illust_id)
+    detail = pixiv_api.illust_detail(illust_id)
     path=(str(detail['illust']['user']['name'])+'_'+str(detail['illust']['user']['id']))
     cpath(base_path+path)
 
@@ -64,9 +69,9 @@ def pixiv_render(item,base_path,debug=False):
     for url in urls:
         name=str(detail['illust']['title']) + '_' + str(illust_id) + os.path.basename(url)
         ret.append(path+'/'+name)
-        api.download(url, name=name, path=os.path.abspath(base_path+path))
+        pixiv_api.download(url, name=name, path=os.path.abspath(base_path + path))
         if debug: print('.',end='',flush=True)
-    return ret, {}
+    return ret, detail
 #endregion
 
 hooks=[
