@@ -83,12 +83,7 @@ class ColItem:
             if ret is None: raise IndexError
             else: return ret
         except IndexError:
-            own_index=0
-            for sibling in self.parent.items:
-                if sibling is self:
-                    break
-                own_index+=1
-            return str(own_index+1)
+            return hash_string(self.get_remote())[:16]
 
     def get_remote(self):
         return self.parts[0]
