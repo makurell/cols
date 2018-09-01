@@ -1,9 +1,11 @@
 import time
 import uiautomation as automation
 import sys
+
+from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QTabWidget, QVBoxLayout, QPushButton, QListView, \
-    QListWidget, QListWidgetItem, QHBoxLayout, QLabel, QScrollArea
-from PyQt5.QtCore import Qt, pyqtSlot
+    QListWidget, QListWidgetItem, QHBoxLayout, QLabel, QScrollArea, QSizePolicy
+from PyQt5.QtCore import Qt, pyqtSlot, QSize
 
 
 def get_chrome_url(focused=False):
@@ -45,7 +47,7 @@ class ColsUI(QMainWindow):
 
     def __init_positioning(self):
         screen_size = self.app.primaryScreen().size()
-        w, h = 400, 70
+        w, h = 400, 150
         self.setGeometry(screen_size.width() - w, screen_size.height() - h - TASKBAR_HEIGHT, w, h)
         self.setContentsMargins(0,0,0,0)
 
@@ -67,7 +69,6 @@ class MyTableWidget(QWidget):
         self.tabs = QTabWidget()
         self.tab1 = QWidget()
         self.tab2 = QWidget()
-        # self.tabs.resize(300, 200)
 
         # Add tabs
         self.tabs.addTab(self.tab1, "Tab 1")
@@ -78,46 +79,32 @@ class MyTableWidget(QWidget):
         self.tab1.layout.setContentsMargins(0,0,0,0)
 
         scroll = QScrollArea(self)
+        scroll.setWidgetResizable(True)
+        scroll.setMinimumHeight(20)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         widget=QWidget()
         hbox=QHBoxLayout()
-        hbox.addWidget(QPushButton('kek'))
-        hbox.addWidget(QPushButton('lek'))
-        hbox.addWidget(QPushButton('mek'))
-        hbox.addWidget(QPushButton('hek'))
-        hbox.addWidget(QPushButton('trek'))
-        hbox.addWidget(QPushButton('smek'))
+        hbox.setContentsMargins(0,0,0,0)
+
+        # size_pol = QSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum)
+        # size_pol.setHorizontalStretch(0)
+        # size_pol.setVerticalStretch(0)
+        # size_pol.setHeightForWidth(size_pol.hasHeightForWidth())
+        size_pol=QSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+
+        for i in range(10):
+            but=QPushButton()
+            but.setContentsMargins(0,0,0,0)
+            but.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+            hbox.addWidget(but)
         widget.setLayout(hbox)
 
         scroll.setWidget(widget)
 
         self.tab1.layout.addWidget(scroll)
         self.tab1.setLayout(self.tab1.layout)
-
-        # wgt=QWidget()
-        # hbox=QHBoxLayout(self)
-        # hbox.addWidget(QPushButton('test'))
-        # wgt.setLayout(hbox)
-        #
-        # scroll_area = QScrollArea()
-        # # hbox = QHBoxLayout()
-        # # hbox.addWidget(QPushButton('test'))
-        # # scroll_area.setLayout(hbox)
-        # # scroll_area.setWidget(hbox)
-        # scroll_area.setWidget(wgt)
-        #
-        # self.tab1.layout.addWidget(scroll_area)
-        # # self.tab1.setLayout(self.layout)
-        #
-        # # wgt = QWidget()
-        # # wgt.addWidget(QLabel('test'))
-        # # wgt.addWidget(QLabel('test2'))
-        # # wgt.addWidget(QLabel('test3'))
-        # # wgt.addWidget(QLabel('test4'))
-        # # wgt.tab1.setLayout(self.tab1.layout)
-        #
-        # # scroll_area= QScrollArea()
-        # # scroll_area.setWidget(wgt)
 
         # Add tabs to widget
         self.layout.addWidget(self.tabs)
