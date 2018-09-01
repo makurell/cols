@@ -2,7 +2,7 @@ import time
 import uiautomation as automation
 import sys
 
-from PyQt5.QtGui import QPixmap, QIcon
+from PyQt5.QtGui import QPixmap, QIcon, QColor, QPalette
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QTabWidget, QVBoxLayout, QPushButton, QListView, \
     QListWidget, QListWidgetItem, QHBoxLayout, QLabel, QScrollArea, QSizePolicy, QGridLayout, QLayout
 from PyQt5.QtCore import Qt, pyqtSlot, QSize
@@ -90,13 +90,34 @@ class MyTableWidget(QWidget):
 
         for i in range(10):
             wgt=QWidget()
-            grid = QGridLayout()
-            grid.setContentsMargins(0,0,0,0)
-            label=QLabel()
-            label.setPixmap(QPixmap('assets/test.jpg').scaledToWidth(100))
-            grid.addWidget(label)
+            # wgt.setContentsMargins(0,0,0,0)
+            vbox = QVBoxLayout()
+            vbox.setAlignment(Qt.AlignBottom)
+            vbox.setContentsMargins(0,0,0,0)
 
-            wgt.setLayout(grid)
+            imgbut=QPushButton()
+            # imgbut.setContentsMargins(0,0,0,0)
+            imgbut.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
+            # pixmap=QPixmap('assets/test.jpg').scaledToWidth(100)
+            # imgbut.setIcon(QIcon(pixmap))
+            # imgbut.setIconSize(pixmap.size())
+            imgbut.setFixedWidth(100)
+
+            # imgbut.setContentsMargins(0,0,0,0)
+            # imgbut.setMaximumHeight(20)
+
+            vbox.addWidget(imgbut)
+
+            but = QLabel('lel')
+            but.setAutoFillBackground(True)
+            p=but.palette()
+            p.setColor(but.backgroundRole(),QColor("#99ccff"))
+            but.setPalette(p)
+            # but.setBackgroundRole(ColorRole)
+            # but.setContentsMargins(0,0,0,0)
+            # label.setMaximumHeight(20)
+            vbox.addWidget(but)
+            wgt.setLayout(vbox)
 
             hbox.addWidget(wgt)
         widget.setLayout(hbox)
