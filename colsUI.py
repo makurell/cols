@@ -59,6 +59,9 @@ class ColsUI(QMainWindow):
 
 class MyTableWidget(QWidget):
 
+    def onbutclicked(self,but):
+        print(but.height())
+
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
         # layout
@@ -85,30 +88,38 @@ class MyTableWidget(QWidget):
         scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         widget=QWidget()
-        widget.setContentsMargins(0,0,0,0)
+        # widget.setContentsMargins(0,0,0,0)
         hbox=QHBoxLayout()
         hbox.setContentsMargins(0,0,0,0)
         hbox.setSpacing(0)
 
         for i in range(10):
             wgt=QWidget()
-            wgt.setContentsMargins(0,0,0,0)
+            # wgt.setContentsMargins(0,0,0,0)
             vbox = QVBoxLayout()
             vbox.setAlignment(Qt.AlignBottom)
-            vbox.setContentsMargins(0,0,0,0)
+            vbox.setContentsMargins(4,4,0,4)
             vbox.setSpacing(0)
 
             imgbut=QPushButton()
-            imgbut.setContentsMargins(10,0,0,0)
+            imgbut.setContentsMargins(0,0,0,0)
             imgbut.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
-            # pixmap=QPixmap('assets/test.jpg').scaledToWidth(100)
-            # imgbut.setIcon(QIcon(pixmap))
-            # imgbut.setIconSize(pixmap.size())
+
+            pixmap=QPixmap('assets/test.jpg')
+            ratio = pixmap.width()/pixmap.height()
+            pixmap=pixmap.scaled(130,130/ratio, Qt.KeepAspectRatio)
+            imgbut.setIcon(QIcon(pixmap))
+            imgbut.setIconSize(pixmap.size())
             imgbut.setFixedWidth(130)
+            imgbut.setFixedHeight(120)
+            # print(hbox.geometry().height())
+
+            imgbut.clicked.connect(lambda:self.onbutclicked(imgbut))
 
             # imgbut.setMaximumHeight(20)
 
             vbox.addWidget(imgbut)
+            # print(imgbut.sizeHint().height())
 
             label = QLabel('lel')
             # label.setAutoFillBackground(True)
@@ -117,7 +128,7 @@ class MyTableWidget(QWidget):
             # label.setPalette(p)
             label.setAlignment(Qt.AlignCenter)
             # but.setBackgroundRole(ColorRole)
-            label.setContentsMargins(0,2,0,2)
+            label.setContentsMargins(0,4,0,0)
             # label.setMaximumHeight(20)
 
             vbox.addWidget(label)
@@ -125,7 +136,7 @@ class MyTableWidget(QWidget):
             hbox.addWidget(wgt)
         widget.setLayout(hbox)
 
-        scroll.setContentsMargins(0,0,0,0)
+        # scroll.setContentsMargins(0,0,0,0)
         scroll.setWidget(widget)
 
         self.tab1.layout.addWidget(scroll)
