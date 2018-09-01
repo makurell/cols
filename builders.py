@@ -72,7 +72,9 @@ def pixiv_render(item,base_path,debug=False):
         if debug: print('.',end='',flush=True)
     return ret, detail
 #endregion
-
+#region pybooru
+#todo implement dif sources
+#endregion
 hooks=[
     (r".*pixiv\.net\/.*illust_id=\d+.*",pixiv_render),
 ]

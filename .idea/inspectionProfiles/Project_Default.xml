@@ -13,6 +13,7 @@
           <option value="W292" />
           <option value="E261" />
           <option value="E713" />
+          <option value="E501" />
         </list>
       </option>
     </inspection_tool>

@@ -438,7 +438,8 @@ def internal_run(raw=None, show_time=True):
 @click.option('--elapsed/--no-elapsed',default=True, help='whether to display elapsed time at the end')
 @click.option('--pixiv-username',envvar="PIXIV_USERNAME",prompt=True)
 @click.option('--pixiv-password',envvar="PIXIV_PASS",prompt=True, hide_input=True)
-def run(file,base,verbosity,elapsed,pixiv_username,pixiv_password):
+def run(file,base,verbosity,elapsed,
+        pixiv_username,pixiv_password):
     global VERBOSITY
     VERBOSITY=verbosity
 
