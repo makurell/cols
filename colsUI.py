@@ -1,7 +1,8 @@
 import time
 import uiautomation as automation
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QTabWidget, QVBoxLayout, QPushButton
+from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QTabWidget, QVBoxLayout, QPushButton, QListView, \
+    QListWidget, QListWidgetItem, QHBoxLayout
 from PyQt5.QtCore import Qt, pyqtSlot
 
 
@@ -73,9 +74,18 @@ class MyTableWidget(QWidget):
         self.tabs.addTab(self.tab2, "Tab 2")
 
         # Create first tab
-        self.tab1.layout = QVBoxLayout(self)
-        self.pushButton1 = QPushButton("PyQt5 button")
-        self.tab1.layout.addWidget(self.pushButton1)
+        self.tab1.layout = QHBoxLayout(self)
+        self.tab1.layout.setContentsMargins(0,0,0,0)
+
+        # self.listview = QListWidget()
+        # self.listview.setMaximumHeight(self.height())
+        #
+        # self.listview.addItem(QListWidgetItem('test',self.listview))
+
+        # create stuff inside tab
+        self.tab1.layout.addWidget(QPushButton('test'))
+        self.tab1.layout.addWidget(QPushButton('test2'))
+        self.tab1.layout.addWidget(QPushButton('test3'))
         self.tab1.setLayout(self.tab1.layout)
 
         # Add tabs to widget
