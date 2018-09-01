@@ -4,7 +4,7 @@ import sys
 
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QTabWidget, QVBoxLayout, QPushButton, QListView, \
-    QListWidget, QListWidgetItem, QHBoxLayout, QLabel, QScrollArea, QSizePolicy
+    QListWidget, QListWidgetItem, QHBoxLayout, QLabel, QScrollArea, QSizePolicy, QGridLayout, QLayout
 from PyQt5.QtCore import Qt, pyqtSlot, QSize
 
 
@@ -89,10 +89,16 @@ class MyTableWidget(QWidget):
         hbox.setContentsMargins(0,0,0,0)
 
         for i in range(10):
-            but=QPushButton(str(i))
-            but.setContentsMargins(0,0,0,0)
-            but.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
-            hbox.addWidget(but)
+            wgt=QWidget()
+            grid = QGridLayout()
+            grid.setContentsMargins(0,0,0,0)
+            label=QLabel()
+            label.setPixmap(QPixmap('assets/test.jpg').scaledToWidth(100))
+            grid.addWidget(label)
+
+            wgt.setLayout(grid)
+
+            hbox.addWidget(wgt)
         widget.setLayout(hbox)
 
         scroll.setWidget(widget)
