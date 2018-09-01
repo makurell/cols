@@ -88,14 +88,8 @@ class MyTableWidget(QWidget):
         hbox=QHBoxLayout()
         hbox.setContentsMargins(0,0,0,0)
 
-        # size_pol = QSizePolicy(QSizePolicy.Minimum,QSizePolicy.Minimum)
-        # size_pol.setHorizontalStretch(0)
-        # size_pol.setVerticalStretch(0)
-        # size_pol.setHeightForWidth(size_pol.hasHeightForWidth())
-        size_pol=QSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
-
         for i in range(10):
-            but=QPushButton()
+            but=QPushButton(str(i))
             but.setContentsMargins(0,0,0,0)
             but.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
             hbox.addWidget(but)
