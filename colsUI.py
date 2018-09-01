@@ -47,7 +47,7 @@ class ColsUI(QMainWindow):
 
     def __init_positioning(self):
         screen_size = self.app.primaryScreen().size()
-        w, h = 400, 150
+        w, h = 550, 200
         self.setGeometry(screen_size.width() - w, screen_size.height() - h - TASKBAR_HEIGHT, w, h)
         self.setContentsMargins(0,0,0,0)
 
@@ -104,19 +104,20 @@ class MyTableWidget(QWidget):
             # pixmap=QPixmap('assets/test.jpg').scaledToWidth(100)
             # imgbut.setIcon(QIcon(pixmap))
             # imgbut.setIconSize(pixmap.size())
-            imgbut.setFixedWidth(100)
+            imgbut.setFixedWidth(130)
 
             # imgbut.setMaximumHeight(20)
 
             vbox.addWidget(imgbut)
 
             label = QLabel('lel')
-            label.setAutoFillBackground(True)
-            p=label.palette()
-            p.setColor(label.backgroundRole(),QColor("#99ccff"))
-            label.setPalette(p)
+            # label.setAutoFillBackground(True)
+            # p=label.palette()
+            # p.setColor(label.backgroundRole(),QColor("#99ccff"))
+            # label.setPalette(p)
+            label.setAlignment(Qt.AlignCenter)
             # but.setBackgroundRole(ColorRole)
-            label.setContentsMargins(0,0,0,0)
+            label.setContentsMargins(0,2,0,2)
             # label.setMaximumHeight(20)
 
             vbox.addWidget(label)
