@@ -49,6 +49,7 @@ class ColsUI(QMainWindow):
         screen_size = self.app.primaryScreen().size()
         w, h = 550, 200
         self.setGeometry(screen_size.width() - w, screen_size.height() - h - TASKBAR_HEIGHT, w, h)
+        self.setFixedHeight(h)
         self.setContentsMargins(0,0,0,0)
 
     def __init_tabs(self):
@@ -88,14 +89,12 @@ class MyTableWidget(QWidget):
         scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         widget=QWidget()
-        # widget.setContentsMargins(0,0,0,0)
         hbox=QHBoxLayout()
         hbox.setContentsMargins(0,0,0,0)
         hbox.setSpacing(0)
 
         for i in range(10):
             wgt=QWidget()
-            # wgt.setContentsMargins(0,0,0,0)
             vbox = QVBoxLayout()
             vbox.setAlignment(Qt.AlignBottom)
             vbox.setContentsMargins(4,4,0,4)
@@ -112,31 +111,19 @@ class MyTableWidget(QWidget):
             imgbut.setIconSize(pixmap.size())
             imgbut.setFixedWidth(130)
             imgbut.setFixedHeight(120)
-            # print(hbox.geometry().height())
 
             imgbut.clicked.connect(lambda:self.onbutclicked(imgbut))
-
-            # imgbut.setMaximumHeight(20)
-
             vbox.addWidget(imgbut)
-            # print(imgbut.sizeHint().height())
 
             label = QLabel('lel')
-            # label.setAutoFillBackground(True)
-            # p=label.palette()
-            # p.setColor(label.backgroundRole(),QColor("#99ccff"))
-            # label.setPalette(p)
             label.setAlignment(Qt.AlignCenter)
-            # but.setBackgroundRole(ColorRole)
             label.setContentsMargins(0,4,0,0)
-            # label.setMaximumHeight(20)
-
             vbox.addWidget(label)
+
             wgt.setLayout(vbox)
             hbox.addWidget(wgt)
-        widget.setLayout(hbox)
 
-        # scroll.setContentsMargins(0,0,0,0)
+        widget.setLayout(hbox)
         scroll.setWidget(widget)
 
         self.tab1.layout.addWidget(scroll)
