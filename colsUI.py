@@ -2,7 +2,7 @@ import time
 import uiautomation as automation
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QTabWidget, QVBoxLayout, QPushButton, QListView, \
-    QListWidget, QListWidgetItem, QHBoxLayout
+    QListWidget, QListWidgetItem, QHBoxLayout, QLabel, QScrollArea
 from PyQt5.QtCore import Qt, pyqtSlot
 
 
@@ -74,19 +74,32 @@ class MyTableWidget(QWidget):
         self.tabs.addTab(self.tab2, "Tab 2")
 
         # Create first tab
-        self.tab1.layout = QHBoxLayout(self)
+        self.tab1.layout = QVBoxLayout(self)
         self.tab1.layout.setContentsMargins(0,0,0,0)
 
-        # self.listview = QListWidget()
-        # self.listview.setMaximumHeight(self.height())
-        #
-        # self.listview.addItem(QListWidgetItem('test',self.listview))
+        wgt=QWidget()
+        hbox=QHBoxLayout(self)
+        hbox.addWidget(QPushButton('test'))
+        wgt.setLayout(hbox)
 
-        # create stuff inside tab
-        self.tab1.layout.addWidget(QPushButton('test'))
-        self.tab1.layout.addWidget(QPushButton('test2'))
-        self.tab1.layout.addWidget(QPushButton('test3'))
-        self.tab1.setLayout(self.tab1.layout)
+        scroll_area = QScrollArea()
+        # hbox = QHBoxLayout()
+        # hbox.addWidget(QPushButton('test'))
+        # scroll_area.setLayout(hbox)
+        # scroll_area.setWidget(hbox)
+        scroll_area.setWidget(wgt)
+
+        self.tab1.layout.addWidget(scroll_area)
+
+        # wgt = QWidget()
+        # wgt.addWidget(QLabel('test'))
+        # wgt.addWidget(QLabel('test2'))
+        # wgt.addWidget(QLabel('test3'))
+        # wgt.addWidget(QLabel('test4'))
+        # wgt.tab1.setLayout(self.tab1.layout)
+
+        # scroll_area= QScrollArea()
+        # scroll_area.setWidget(wgt)
 
         # Add tabs to widget
         self.layout.addWidget(self.tabs)
