@@ -77,29 +77,47 @@ class MyTableWidget(QWidget):
         self.tab1.layout = QVBoxLayout(self)
         self.tab1.layout.setContentsMargins(0,0,0,0)
 
-        wgt=QWidget()
-        hbox=QHBoxLayout(self)
-        hbox.addWidget(QPushButton('test'))
-        wgt.setLayout(hbox)
+        scroll = QScrollArea(self)
 
-        scroll_area = QScrollArea()
-        # hbox = QHBoxLayout()
+        widget=QWidget()
+        hbox=QHBoxLayout()
+        hbox.addWidget(QPushButton('kek'))
+        hbox.addWidget(QPushButton('lek'))
+        hbox.addWidget(QPushButton('mek'))
+        hbox.addWidget(QPushButton('hek'))
+        hbox.addWidget(QPushButton('trek'))
+        hbox.addWidget(QPushButton('smek'))
+        widget.setLayout(hbox)
+
+        scroll.setWidget(widget)
+
+        self.tab1.layout.addWidget(scroll)
+        self.tab1.setLayout(self.tab1.layout)
+
+        # wgt=QWidget()
+        # hbox=QHBoxLayout(self)
         # hbox.addWidget(QPushButton('test'))
-        # scroll_area.setLayout(hbox)
-        # scroll_area.setWidget(hbox)
-        scroll_area.setWidget(wgt)
-
-        self.tab1.layout.addWidget(scroll_area)
-
-        # wgt = QWidget()
-        # wgt.addWidget(QLabel('test'))
-        # wgt.addWidget(QLabel('test2'))
-        # wgt.addWidget(QLabel('test3'))
-        # wgt.addWidget(QLabel('test4'))
-        # wgt.tab1.setLayout(self.tab1.layout)
-
-        # scroll_area= QScrollArea()
+        # wgt.setLayout(hbox)
+        #
+        # scroll_area = QScrollArea()
+        # # hbox = QHBoxLayout()
+        # # hbox.addWidget(QPushButton('test'))
+        # # scroll_area.setLayout(hbox)
+        # # scroll_area.setWidget(hbox)
         # scroll_area.setWidget(wgt)
+        #
+        # self.tab1.layout.addWidget(scroll_area)
+        # # self.tab1.setLayout(self.layout)
+        #
+        # # wgt = QWidget()
+        # # wgt.addWidget(QLabel('test'))
+        # # wgt.addWidget(QLabel('test2'))
+        # # wgt.addWidget(QLabel('test3'))
+        # # wgt.addWidget(QLabel('test4'))
+        # # wgt.tab1.setLayout(self.tab1.layout)
+        #
+        # # scroll_area= QScrollArea()
+        # # scroll_area.setWidget(wgt)
 
         # Add tabs to widget
         self.layout.addWidget(self.tabs)
