@@ -85,43 +85,46 @@ class MyTableWidget(QWidget):
         scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         widget=QWidget()
+        widget.setContentsMargins(0,0,0,0)
         hbox=QHBoxLayout()
         hbox.setContentsMargins(0,0,0,0)
+        hbox.setSpacing(0)
 
         for i in range(10):
             wgt=QWidget()
-            # wgt.setContentsMargins(0,0,0,0)
+            wgt.setContentsMargins(0,0,0,0)
             vbox = QVBoxLayout()
             vbox.setAlignment(Qt.AlignBottom)
             vbox.setContentsMargins(0,0,0,0)
+            vbox.setSpacing(0)
 
             imgbut=QPushButton()
-            # imgbut.setContentsMargins(0,0,0,0)
+            imgbut.setContentsMargins(10,0,0,0)
             imgbut.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
             # pixmap=QPixmap('assets/test.jpg').scaledToWidth(100)
             # imgbut.setIcon(QIcon(pixmap))
             # imgbut.setIconSize(pixmap.size())
             imgbut.setFixedWidth(100)
 
-            # imgbut.setContentsMargins(0,0,0,0)
             # imgbut.setMaximumHeight(20)
 
             vbox.addWidget(imgbut)
 
-            but = QLabel('lel')
-            but.setAutoFillBackground(True)
-            p=but.palette()
-            p.setColor(but.backgroundRole(),QColor("#99ccff"))
-            but.setPalette(p)
+            label = QLabel('lel')
+            label.setAutoFillBackground(True)
+            p=label.palette()
+            p.setColor(label.backgroundRole(),QColor("#99ccff"))
+            label.setPalette(p)
             # but.setBackgroundRole(ColorRole)
-            # but.setContentsMargins(0,0,0,0)
+            label.setContentsMargins(0,0,0,0)
             # label.setMaximumHeight(20)
-            vbox.addWidget(but)
-            wgt.setLayout(vbox)
 
+            vbox.addWidget(label)
+            wgt.setLayout(vbox)
             hbox.addWidget(wgt)
         widget.setLayout(hbox)
 
+        scroll.setContentsMargins(0,0,0,0)
         scroll.setWidget(widget)
 
         self.tab1.layout.addWidget(scroll)
