@@ -161,7 +161,10 @@ class CoreWidget(QWidget):
 
         pixmap = QPixmap(self.__get_img(section))
         ratio = pixmap.width() / pixmap.height()
-        pixmap = pixmap.scaled(IMG_WIDTH, IMG_WIDTH / ratio, Qt.KeepAspectRatio)
+        if pixmap.height()>pixmap.width():
+            pixmap = pixmap.scaled(IMG_WIDTH, IMG_WIDTH / ratio, Qt.KeepAspectRatio)
+        else:
+            pixmap=pixmap.scaled(IMG_WIDTH*ratio,IMG_WIDTH)
         imgbut.setIcon(QIcon(pixmap))
         imgbut.setIconSize(pixmap.size())
         imgbut.setFixedWidth(IMG_WIDTH)
