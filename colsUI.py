@@ -1,10 +1,12 @@
+import os
 import time
 import uiautomation as automation
 import sys
+from cols import ColFile, ColItem, ColSection
 
 from PyQt5.QtGui import QPixmap, QIcon, QColor, QPalette
 from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QTabWidget, QVBoxLayout, QPushButton, QListView, \
-    QListWidget, QListWidgetItem, QHBoxLayout, QLabel, QScrollArea, QSizePolicy, QGridLayout, QLayout
+    QListWidget, QListWidgetItem, QHBoxLayout, QLabel, QScrollArea, QSizePolicy, QGridLayout, QLayout, QFileDialog
 from PyQt5.QtCore import Qt, pyqtSlot, QSize
 
 
@@ -29,21 +31,22 @@ def get_chrome_url(focused=False):
 
 
 TASKBAR_HEIGHT=50
+IMG_WIDTH=130
 class ColsUI(QMainWindow):
     app: QApplication
 
-    def __init__(self,app):
+    def __init__(self,app,cf:ColFile):
         super().__init__(flags=
                          Qt.WindowStaysOnTopHint
                          # | Qt.FramelessWindowHint
                          )
-
         self.app=app
+        self.cf=cf
         self.__init_ui()
 
     def __init_ui(self):
         self.__init_positioning()
-        self.__init_tabs()
+        self.__init_core()
 
     def __init_positioning(self):
         screen_size = self.app.primaryScreen().size()
@@ -52,35 +55,55 @@ class ColsUI(QMainWindow):
         self.setFixedHeight(h)
         self.setContentsMargins(0,0,0,0)
 
-    def __init_tabs(self):
+    def __init_core(self):
         self.setContentsMargins(0, 0, 0, 0)
-        self.setCentralWidget(MyTableWidget(self))
+        self.setCentralWidget(CoreWidget(self))
         pass
 
 
-class MyTableWidget(QWidget):
+class CoreWidget(QWidget):
 
     def onbutclicked(self,but):
         print(but.height())
 
-    def __init__(self, parent):
-        super(QWidget, self).__init__(parent)
-        # layout
-        self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(0,0,0,0)
+    def __init_sec(self):
+        #container stuff
+        wgt = QWidget()
+        vbox = QVBoxLayout()
+        vbox.setAlignment(Qt.AlignBottom)
+        vbox.setContentsMargins(4, 4, 0, 4)
+        vbox.setSpacing(0)
 
-        # Initialize tab screen
-        self.tabs = QTabWidget()
-        self.tab1 = QWidget()
-        self.tab2 = QWidget()
+        #top imgbutton
+        imgbut = QPushButton()
+        imgbut.setContentsMargins(0, 0, 0, 0)
+        imgbut.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-        # Add tabs
-        self.tabs.addTab(self.tab1, "Tab 1")
-        self.tabs.addTab(self.tab2, "Tab 2")
+        pixmap = QPixmap('assets/test.jpg')
+        ratio = pixmap.width() / pixmap.height()
+        pixmap = pixmap.scaled(IMG_WIDTH, IMG_WIDTH / ratio, Qt.KeepAspectRatio)
+        imgbut.setIcon(QIcon(pixmap))
+        imgbut.setIconSize(pixmap.size())
+        imgbut.setFixedWidth(IMG_WIDTH)
+        imgbut.setFixedHeight(120)
 
-        # Create first tab
-        self.tab1.layout = QVBoxLayout(self)
-        self.tab1.layout.setContentsMargins(0,0,0,0)
+        imgbut.clicked.connect(lambda: self.onbutclicked(imgbut))
+        vbox.addWidget(imgbut)
+
+        #bottom label
+        label = QLabel('lel')
+        label.setAlignment(Qt.AlignCenter)
+        label.setContentsMargins(0, 4, 0, 0)
+        vbox.addWidget(label)
+
+        wgt.setLayout(vbox)
+        return wgt
+
+    def __init_tab(self):
+        #container stuff
+        tab = QWidget()
+        tab.layout = QVBoxLayout(self)
+        tab.layout.setContentsMargins(0, 0, 0, 0)
 
         scroll = QScrollArea(self)
         scroll.setWidgetResizable(True)
@@ -88,53 +111,51 @@ class MyTableWidget(QWidget):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-        widget=QWidget()
-        hbox=QHBoxLayout()
-        hbox.setContentsMargins(0,0,0,0)
+        widget = QWidget()
+        hbox = QHBoxLayout()
+        hbox.setContentsMargins(0, 0, 0, 0)
         hbox.setSpacing(0)
 
+        #secs
         for i in range(10):
-            wgt=QWidget()
-            vbox = QVBoxLayout()
-            vbox.setAlignment(Qt.AlignBottom)
-            vbox.setContentsMargins(4,4,0,4)
-            vbox.setSpacing(0)
+            hbox.addWidget(self.__init_sec())
 
-            imgbut=QPushButton()
-            imgbut.setContentsMargins(0,0,0,0)
-            imgbut.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Expanding)
-
-            pixmap=QPixmap('assets/test.jpg')
-            ratio = pixmap.width()/pixmap.height()
-            pixmap=pixmap.scaled(130,130/ratio, Qt.KeepAspectRatio)
-            imgbut.setIcon(QIcon(pixmap))
-            imgbut.setIconSize(pixmap.size())
-            imgbut.setFixedWidth(130)
-            imgbut.setFixedHeight(120)
-
-            imgbut.clicked.connect(lambda:self.onbutclicked(imgbut))
-            vbox.addWidget(imgbut)
-
-            label = QLabel('lel')
-            label.setAlignment(Qt.AlignCenter)
-            label.setContentsMargins(0,4,0,0)
-            vbox.addWidget(label)
-
-            wgt.setLayout(vbox)
-            hbox.addWidget(wgt)
-
+        #adding widgets
         widget.setLayout(hbox)
         scroll.setWidget(widget)
+        tab.layout.addWidget(scroll)
+        tab.setLayout(tab.layout)
+        return tab
 
-        self.tab1.layout.addWidget(scroll)
-        self.tab1.setLayout(self.tab1.layout)
+    def __init__tabs(self):
+        tabs = QTabWidget()
 
-        # Add tabs to widget
-        self.layout.addWidget(self.tabs)
+        # Add tabs
+        tabs.addTab(self.__init_tab(), "Tab 1")
+
+        return tabs
+
+    def __init__(self, parent):
+        super(QWidget, self).__init__(parent)
+
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(0,0,0,0)
+
+        self.layout.addWidget(self.__init__tabs())
         self.setLayout(self.layout)
 
 if __name__=='__main__':
     app = QApplication(sys.argv)
-    ui = ColsUI(app)
+
+    if os.path.isfile('data.col'):
+        cf = ColFile('data.col')
+    else:
+        cf = ColFile(QFileDialog.getOpenFileName()[0])
+    cf.base_path = 'cols'
+    cf.parse()
+    cf.render()
+    print('Ready')
+
+    ui = ColsUI(app,cf)
     ui.show()
     sys.exit(app.exec_())

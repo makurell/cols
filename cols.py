@@ -8,7 +8,6 @@ import shutil
 import time
 import click
 
-import builders
 from io import StringIO
 
 VERBOSITY=1
@@ -26,13 +25,14 @@ def get_parts(s,skip_start=True):
     return ret
 
 def get_renderer(item):
-    for hook in builders.hooks:
+    from builders import hooks, default_render
+    for hook in hooks:
         if re.match("^"+hook[0]+"$",item.get_remote()):
             try:
                 if hook[1] is not None:
                     return hook[1]
             except IndexError: pass
-    return builders.default_render
+    return default_render
 
 def hash_file(file_path):
     m=hashlib.sha256()

@@ -1,6 +1,6 @@
 import urllib.parse as urlparse
 from pixivpy3 import AppPixivAPI
-from cols import ColSection, ColItem
+from cols import ColItem
 from PIL import Image
 from io import BytesIO
 import os
