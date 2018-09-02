@@ -2,6 +2,7 @@
 *.proc.col
 locs.json
 cols/
+uidata.json
 
 # User-specific stuff
 .idea/**/workspace.xml

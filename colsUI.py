@@ -136,7 +136,9 @@ class CoreWidget(QWidget):
         hbox.setSpacing(0)
 
         #secs
-        for sec in section.get_descendants():
+        secs=section.get_descendants()
+        secs.sort(key=lambda x: self.history.get(x.get_path(),len(x.items)),reverse=True)
+        for sec in secs:
             hbox.addWidget(self.__init_sec(sec))
 
         #adding widgets
@@ -162,7 +164,7 @@ class CoreWidget(QWidget):
         pixmap = QPixmap(self.__get_img(section))
         ratio = pixmap.width() / pixmap.height()
         if pixmap.height()>pixmap.width():
-            pixmap = pixmap.scaled(IMG_WIDTH, IMG_WIDTH / ratio, Qt.KeepAspectRatio)
+            pixmap = pixmap.scaled(IMG_WIDTH, IMG_WIDTH / ratio)
         else:
             pixmap=pixmap.scaled(IMG_WIDTH*ratio,IMG_WIDTH)
         imgbut.setIcon(QIcon(pixmap))
@@ -170,7 +172,7 @@ class CoreWidget(QWidget):
         imgbut.setFixedWidth(IMG_WIDTH)
         imgbut.setFixedHeight(120)
 
-        imgbut.clicked.connect(lambda: self.onbutclicked(imgbut,section))
+        imgbut.clicked.connect(lambda: self.on_but_clicked(imgbut, section))
         vbox.addWidget(imgbut)
 
         #bottom label
@@ -193,13 +195,15 @@ class CoreWidget(QWidget):
         except IndexError:
             return 'assets/placeholder.png'
 
-    def onbutclicked(self,but,section:ColSection):
+    def on_but_clicked(self, but, section:ColSection):
         new_item=ColItem(section)
         new_item.parts = [self.remote,None,None]
         section.items.append(new_item)
         self.parent().close()
         with open(self.cf.path,'w') as f:
             f.write(self.cf.serialise())
+        self.history[section.get_path()]=int(time.time())
+        self.save_data()
         print('UI added url: '+self.remote)
         global render_lock
         if not render_lock:
