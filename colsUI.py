@@ -57,14 +57,57 @@ class ColsUI(QMainWindow):
 
     def __init_core(self):
         self.setContentsMargins(0, 0, 0, 0)
-        self.setCentralWidget(CoreWidget(self))
+        self.setCentralWidget(CoreWidget(self,self.cf))
         pass
 
 
 class CoreWidget(QWidget):
 
-    def onbutclicked(self,but):
-        print(but.height())
+    def __init__(self, parent,cf):
+        super(QWidget, self).__init__(parent)
+
+        self.cf=cf
+
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(0,0,0,0)
+
+        self.layout.addWidget(self.__init__tabs())
+        self.setLayout(self.layout)
+
+    def __init__tabs(self):
+        tabs = QTabWidget()
+
+        # Add tabs
+        tabs.addTab(self.__init_tab(), "Tab 1")
+        return tabs
+
+    def __init_tab(self):
+        #container stuff
+        tab = QWidget()
+        tab.layout = QVBoxLayout(self)
+        tab.layout.setContentsMargins(0, 0, 0, 0)
+
+        scroll = QScrollArea(self)
+        scroll.setWidgetResizable(True)
+        scroll.setMinimumHeight(20)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        widget = QWidget()
+        hbox = QHBoxLayout()
+        hbox.setContentsMargins(0, 0, 0, 0)
+        hbox.setSpacing(0)
+
+        #secs
+        for i in range(10):
+            hbox.addWidget(self.__init_sec())
+
+        #adding widgets
+        widget.setLayout(hbox)
+        scroll.setWidget(widget)
+        tab.layout.addWidget(scroll)
+        tab.setLayout(tab.layout)
+        return tab
 
     def __init_sec(self):
         #container stuff
@@ -99,50 +142,9 @@ class CoreWidget(QWidget):
         wgt.setLayout(vbox)
         return wgt
 
-    def __init_tab(self):
-        #container stuff
-        tab = QWidget()
-        tab.layout = QVBoxLayout(self)
-        tab.layout.setContentsMargins(0, 0, 0, 0)
+    def onbutclicked(self,but):
+        print(but.height())
 
-        scroll = QScrollArea(self)
-        scroll.setWidgetResizable(True)
-        scroll.setMinimumHeight(20)
-        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-
-        widget = QWidget()
-        hbox = QHBoxLayout()
-        hbox.setContentsMargins(0, 0, 0, 0)
-        hbox.setSpacing(0)
-
-        #secs
-        for i in range(10):
-            hbox.addWidget(self.__init_sec())
-
-        #adding widgets
-        widget.setLayout(hbox)
-        scroll.setWidget(widget)
-        tab.layout.addWidget(scroll)
-        tab.setLayout(tab.layout)
-        return tab
-
-    def __init__tabs(self):
-        tabs = QTabWidget()
-
-        # Add tabs
-        tabs.addTab(self.__init_tab(), "Tab 1")
-
-        return tabs
-
-    def __init__(self, parent):
-        super(QWidget, self).__init__(parent)
-
-        self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(0,0,0,0)
-
-        self.layout.addWidget(self.__init__tabs())
-        self.setLayout(self.layout)
 
 if __name__=='__main__':
     app = QApplication(sys.argv)
