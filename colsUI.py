@@ -35,14 +35,16 @@ def get_chrome_url(focused=False):
 
 TASKBAR_HEIGHT=50
 IMG_WIDTH=130
-class ColsUI(QMainWindow):
+render_lock=False
+class ColSelectDialog(QMainWindow):
     app: QApplication
 
-    def __init__(self,app,cf:ColFile):
+    def __init__(self,app,cf:ColFile,remote):
         super().__init__(flags=
                          Qt.WindowStaysOnTopHint
                          # | Qt.FramelessWindowHint
                          )
+        self.remote=remote
         self.app=app
         self.cf=cf
         self.__init_ui()
@@ -60,15 +62,15 @@ class ColsUI(QMainWindow):
 
     def __init_core(self):
         self.setContentsMargins(0, 0, 0, 0)
-        self.setCentralWidget(CoreWidget(self,self.cf))
+        self.setCentralWidget(CoreWidget(self,self.cf,self.remote))
         pass
-
 
 class CoreWidget(QWidget):
 
-    def __init__(self, parent,cf:ColFile):
+    def __init__(self, parent,cf:ColFile,remote):
         super(QWidget, self).__init__(parent)
-
+        self.remote=remote
+        self.parent_=parent
         self.cf=cf
 
         self.layout = QVBoxLayout(self)
@@ -134,7 +136,7 @@ class CoreWidget(QWidget):
         imgbut.setFixedWidth(IMG_WIDTH)
         imgbut.setFixedHeight(120)
 
-        imgbut.clicked.connect(lambda: self.onbutclicked(imgbut))
+        imgbut.clicked.connect(lambda: self.onbutclicked(imgbut,section))
         vbox.addWidget(imgbut)
 
         #bottom label
@@ -157,8 +159,19 @@ class CoreWidget(QWidget):
         except IndexError:
             return 'assets/test.jpg'
 
-    def onbutclicked(self,but):
-        print(but.height())
+    def onbutclicked(self,but,section:ColSection):
+        new_item=ColItem(section)
+        new_item.parts = [self.remote,None,None]
+        section.items.append(new_item)
+        self.parent().close()
+        with open(self.cf.path,'w') as f:
+            f.write(self.cf.serialise())
+        print('UI added url: '+self.remote)
+        global render_lock
+        if not render_lock:
+            render_lock=True
+            self.cf.render()
+            render_lock=False
 
 @click.command()
 @click.option('--pixiv-username',envvar="PIXIV_USERNAME",prompt=True)
@@ -179,7 +192,7 @@ def main(pixiv_username,pixiv_password):
     cf.render()
     print('Ready')
 
-    ui = ColsUI(app, cf)
+    ui = ColSelectDialog(app, cf,r'https://www.pixiv.net/member_illust.php?mode=medium&illust_id=68889529')
     ui.show()
     sys.exit(app.exec_())
 
