@@ -12,6 +12,8 @@ import click
 
 from io import StringIO
 
+from filelock import FileLock
+
 VERBOSITY=1
 # region functions
 def get_level(s):
@@ -254,9 +256,15 @@ class ColFile:
         self.base_path="cols"
 
     def parse(self,raw=None):
+        del self.sections
+        del self.meta
+        self.sections=[]
+        self.meta=""
+
         if raw is None:
-            with open(self.path, 'r',encoding='utf-8') as f:
-                self.raw=f.read()
+            with FileLock(self.path+'.lock',30):
+                with open(self.path, 'r',encoding='utf-8') as f:
+                    self.raw=f.read()
         else:
             self.raw=raw
 

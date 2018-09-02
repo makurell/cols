@@ -2,12 +2,17 @@ import json
 import os
 import random
 import time
+import traceback
+
 import keyboard
 import threading
 
 import click
 import uiautomation as automation
 import sys
+
+from filelock import FileLock
+
 from cols import ColFile, ColItem, ColSection
 
 from PyQt5.QtGui import QPixmap, QIcon, QColor, QPalette
@@ -89,15 +94,17 @@ class CoreWidget(QWidget):
         self.setLayout(self.layout)
 
     def save_data(self):
-        with(open('uidata.json','w')) as f:
-            f.write(str(self.last_tab)+'\n')
-            f.write(json.dumps(self.history))
+        with FileLock('uidata.json.lock',30):
+            with(open('uidata.json','w')) as f:
+                f.write(str(self.last_tab)+'\n')
+                f.write(json.dumps(self.history))
 
     def read_data(self):
         if os.path.exists('uidata.json'):
-            with(open('uidata.json','r')) as f:
-                self.last_tab=f.readline().strip()
-                self.history=json.loads(f.readline())
+            with FileLock('uidata.json.lock',30):
+                with(open('uidata.json','r')) as f:
+                    self.last_tab=f.readline().strip()
+                    self.history=json.loads(f.readline())
 
     def on_tabs_changed(self,index):
         self.last_tab=self.tab_names[index]
@@ -164,13 +171,15 @@ class CoreWidget(QWidget):
         imgbut.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         pixmap = QPixmap(self.__get_img(section))
-        ratio = pixmap.width() / pixmap.height()
-        if pixmap.height()>pixmap.width():
-            pixmap = pixmap.scaled(IMG_WIDTH, IMG_WIDTH / ratio)
-        else:
-            pixmap=pixmap.scaled(IMG_WIDTH*ratio,IMG_WIDTH)
-        imgbut.setIcon(QIcon(pixmap))
-        imgbut.setIconSize(pixmap.size())
+        if pixmap.height()!=0:
+            ratio = pixmap.width() / pixmap.height()
+            if pixmap.height()>pixmap.width():
+                pixmap = pixmap.scaled(IMG_WIDTH, IMG_WIDTH / ratio)
+            else:
+                pixmap=pixmap.scaled(IMG_WIDTH*ratio,IMG_WIDTH)
+            imgbut.setIcon(QIcon(pixmap))
+            imgbut.setIconSize(pixmap.size())
+
         imgbut.setFixedWidth(IMG_WIDTH)
         imgbut.setFixedHeight(120)
 
@@ -194,15 +203,13 @@ class CoreWidget(QWidget):
                 return file
             else:
                 raise IndexError
-        except (IndexError,TypeError,AttributeError):
+        except (IndexError,TypeError,AttributeError,KeyError):
             return 'assets/placeholder.png'
 
     def on_but_clicked(self, but, section:ColSection):
         new_item=ColItem(section)
         new_item.parts = [self.remote,None,None]
         section.items.append(new_item)
-        with open(self.cf.path,'w') as f:
-            f.write(self.cf.serialise())
         self.history[section.get_path()]=int(time.time())
         self.save_data()
         print('UI added url: '+self.remote)
@@ -232,18 +239,33 @@ def set_save_flag(b):
 def close():
     global ui
     global save_flag
-    if ui is not None:
-        ui.close()
-    save_flag = False
+    try:
+        if ui is not None:
+            ui.close()
+    finally:
+        save_flag = False
 
-def quit(cf):
+def quit():
     global quit_flag
-    close()
-    cf.parse()
-    cf.render()
-    keyboard.unhook_all()
-    print('Quit')
-    quit_flag=True
+    try:
+        close()
+        keyboard.unhook_all()
+        print('Quit')
+    finally:
+        quit_flag=True
+
+def render_loop(cf):
+    while True:
+        try:
+            # print('render_loop')
+            cf.parse()
+            cf.render()
+            with FileLock(cf.path+'.lock',1):
+                with open(cf.path, 'w') as f:
+                    f.write(cf.serialise())
+        except:
+            traceback.print_exc()
+        time.sleep(5)
 
 @click.command()
 @click.option('--pixiv-username',envvar="PIXIV_USERNAME",prompt=True)
@@ -264,15 +286,19 @@ def main(pixiv_username,pixiv_password):
     cf.render()
     print('Ready')
 
-    keyboard.add_hotkey('ctrl+alt+q',quit,args=(cf,))
+    threading.Thread(target=render_loop,args=(cf,)).start()
+
+    keyboard.add_hotkey('ctrl+alt+q',quit)
     keyboard.add_hotkey('ctrl+alt+x',close)
     keyboard.add_hotkey('ctrl+alt+s',set_save_flag,args=(True,))
 
     while True:
         global save_flag
         if save_flag:
-            do_dialog(app,cf)
-            save_flag=False
+            try:
+                do_dialog(app,cf)
+            finally:
+                save_flag=False
         if quit_flag:
             break
         time.sleep(0.1)
