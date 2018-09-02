@@ -2,6 +2,8 @@ import json
 import os
 import random
 import time
+import keyboard
+import threading
 
 import click
 import uiautomation as automation
@@ -43,7 +45,7 @@ class ColSelectDialog(QMainWindow):
     def __init__(self,app,cf:ColFile,remote):
         super().__init__(flags=
                          Qt.WindowStaysOnTopHint
-                         # | Qt.FramelessWindowHint
+                         | Qt.FramelessWindowHint
                          )
         self.remote=remote
         self.app=app
@@ -192,24 +194,53 @@ class CoreWidget(QWidget):
                 return file
             else:
                 raise IndexError
-        except IndexError:
+        except (IndexError,TypeError,AttributeError):
             return 'assets/placeholder.png'
 
     def on_but_clicked(self, but, section:ColSection):
         new_item=ColItem(section)
         new_item.parts = [self.remote,None,None]
         section.items.append(new_item)
-        self.parent().close()
         with open(self.cf.path,'w') as f:
             f.write(self.cf.serialise())
         self.history[section.get_path()]=int(time.time())
         self.save_data()
         print('UI added url: '+self.remote)
-        global render_lock
-        if not render_lock:
-            render_lock=True
-            self.cf.render()
-            render_lock=False
+        self.parent().close()
+
+        # threading.Thread(self.do_render).start()
+
+    # def do_render(self):
+    #     global render_lock
+    #     if not render_lock:
+    #         render_lock = True
+    #         self.cf.render()
+    #         render_lock = False
+
+ui=None
+save_flag=False
+quit_flag=False
+
+def do_dialog(app,cf):
+    global ui
+    print(get_chrome_url(True))
+    ui = ColSelectDialog(app, cf, r'https://www.pixiv.net/member_illust.php?mode=medium&illust_id=68889529')
+    ui.show()
+
+def set_save_flag(b):
+    global save_flag
+    save_flag=b
+
+def quit(cf):
+    global ui
+    global quit_flag
+    if ui is not None:
+        ui.close()
+    cf.parse()
+    cf.render()
+    keyboard.unhook_all()
+    print('Quit')
+    quit_flag=True
 
 @click.command()
 @click.option('--pixiv-username',envvar="PIXIV_USERNAME",prompt=True)
@@ -230,9 +261,19 @@ def main(pixiv_username,pixiv_password):
     cf.render()
     print('Ready')
 
-    ui = ColSelectDialog(app, cf,r'https://www.pixiv.net/member_illust.php?mode=medium&illust_id=68889529')
-    ui.show()
-    sys.exit(app.exec_())
+    keyboard.add_hotkey('ctrl+alt+q',quit,args=(cf,))
+    keyboard.add_hotkey('ctrl+alt+s',set_save_flag,args=(True,))
+
+    while True:
+        global save_flag
+        if save_flag:
+            threading.Thread(do_dialog(app,cf)).start()
+            save_flag=False
+            app.exec_()
+        elif quit_flag:
+            break
+        else:
+            time.sleep(0.1)
 
 if __name__=='__main__':
     main()
