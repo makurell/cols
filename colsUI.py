@@ -148,7 +148,8 @@ class CoreWidget(QWidget):
 
     def __get_img(self, section:ColSection):
         try:
-            file=section.get_path()+section.items[0].get_name()
+            loc=self.cf.get_loc(item=section.items[0])
+            file=loc[0]+loc[1][0]
             if os.path.exists(file):
                 return file
             else:

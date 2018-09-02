@@ -394,6 +394,21 @@ class ColFile:
             ret.extend(section.get_items())
         return ret
 
+    def get_loc(self, item=None, hash=None):
+        hsh=None
+        if hash is not None:
+            hsh=hash
+        elif item is not None:
+            hsh=hash_string(item.get_remote())
+        else:
+            raise ValueError
+        ret=self.locs[hsh]
+        if item is not None:
+            for locitem in ret:
+                if locitem[0]==item.parent.get_path():
+                    return locitem
+        return ret
+
     #region serialisation
     def get_name(self,name_version=0):
         return self.base_path
