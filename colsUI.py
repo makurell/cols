@@ -157,7 +157,7 @@ class CoreWidget(QWidget):
             else:
                 raise IndexError
         except IndexError:
-            return 'assets/test.jpg'
+            return 'assets/placeholder.png'
 
     def onbutclicked(self,but,section:ColSection):
         new_item=ColItem(section)
