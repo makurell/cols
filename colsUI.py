@@ -1,3 +1,4 @@
+import json
 import os
 import random
 import time
@@ -73,18 +74,48 @@ class CoreWidget(QWidget):
         self.parent_=parent
         self.cf=cf
 
+        self.history={}
+        self.last_tab=None
+
+        self.tab_names=[]
+
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0,0,0,0)
 
+        self.read_data()
         self.layout.addWidget(self.__init__tabs())
         self.setLayout(self.layout)
+
+    def save_data(self):
+        with(open('uidata.json','w')) as f:
+            f.write(str(self.last_tab)+'\n')
+            f.write(json.dumps(self.history))
+
+    def read_data(self):
+        if os.path.exists('uidata.json'):
+            with(open('uidata.json','r')) as f:
+                self.last_tab=f.readline().strip()
+                self.history=json.loads(f.readline())
+
+    def on_tabs_changed(self,index):
+        self.last_tab=self.tab_names[index]
+        self.save_data()
 
     def __init__tabs(self):
         tabs = QTabWidget()
 
         # Add tabs
+        to_sel=0
+        i=0
         for main_sec in self.cf.sections:
-            tabs.addTab(self.__init_tab(main_sec),main_sec.get_name(1))
+            name=main_sec.get_name(1)
+            tabs.addTab(self.__init_tab(main_sec),name)
+            if name == self.last_tab:
+                to_sel=i
+            self.tab_names.append(name)
+            i+=1
+        tabs.setCurrentIndex(to_sel)
+        tabs.currentChanged.connect(self.on_tabs_changed)
         return tabs
 
     def __init_tab(self, section:ColSection):
