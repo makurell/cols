@@ -208,34 +208,37 @@ class CoreWidget(QWidget):
         print('UI added url: '+self.remote)
         self.parent().close()
 
-        # threading.Thread(self.do_render).start()
-
-    # def do_render(self):
-    #     global render_lock
-    #     if not render_lock:
-    #         render_lock = True
-    #         self.cf.render()
-    #         render_lock = False
-
 ui=None
 save_flag=False
 quit_flag=False
 
 def do_dialog(app,cf):
     global ui
-    print(get_chrome_url(True))
-    ui = ColSelectDialog(app, cf, r'https://www.pixiv.net/member_illust.php?mode=medium&illust_id=68889529')
+    chrome_url=get_chrome_url(True)
+    if chrome_url is not None:
+        print("Dialog for: "+chrome_url)
+        ui = ColSelectDialog(app, cf, chrome_url)
+    else:
+        print('Could not find anything to save')
+        return
+
     ui.show()
+    app.exec_()
 
 def set_save_flag(b):
     global save_flag
     save_flag=b
 
-def quit(cf):
+def close():
     global ui
-    global quit_flag
+    global save_flag
     if ui is not None:
         ui.close()
+    save_flag = False
+
+def quit(cf):
+    global quit_flag
+    close()
     cf.parse()
     cf.render()
     keyboard.unhook_all()
@@ -262,18 +265,17 @@ def main(pixiv_username,pixiv_password):
     print('Ready')
 
     keyboard.add_hotkey('ctrl+alt+q',quit,args=(cf,))
+    keyboard.add_hotkey('ctrl+alt+x',close)
     keyboard.add_hotkey('ctrl+alt+s',set_save_flag,args=(True,))
 
     while True:
         global save_flag
         if save_flag:
-            threading.Thread(do_dialog(app,cf)).start()
+            do_dialog(app,cf)
             save_flag=False
-            app.exec_()
-        elif quit_flag:
+        if quit_flag:
             break
-        else:
-            time.sleep(0.1)
+        time.sleep(0.1)
 
 if __name__=='__main__':
     main()
