@@ -1,5 +1,8 @@
 import os
+import random
 import time
+
+import click
 import uiautomation as automation
 import sys
 from cols import ColFile, ColItem, ColSection
@@ -63,7 +66,7 @@ class ColsUI(QMainWindow):
 
 class CoreWidget(QWidget):
 
-    def __init__(self, parent,cf):
+    def __init__(self, parent,cf:ColFile):
         super(QWidget, self).__init__(parent)
 
         self.cf=cf
@@ -78,10 +81,11 @@ class CoreWidget(QWidget):
         tabs = QTabWidget()
 
         # Add tabs
-        tabs.addTab(self.__init_tab(), "Tab 1")
+        for main_sec in self.cf.sections:
+            tabs.addTab(self.__init_tab(main_sec),main_sec.get_name(1))
         return tabs
 
-    def __init_tab(self):
+    def __init_tab(self, section:ColSection):
         #container stuff
         tab = QWidget()
         tab.layout = QVBoxLayout(self)
@@ -99,8 +103,8 @@ class CoreWidget(QWidget):
         hbox.setSpacing(0)
 
         #secs
-        for i in range(10):
-            hbox.addWidget(self.__init_sec())
+        for sec in section.get_descendants():
+            hbox.addWidget(self.__init_sec(sec))
 
         #adding widgets
         widget.setLayout(hbox)
@@ -109,7 +113,7 @@ class CoreWidget(QWidget):
         tab.setLayout(tab.layout)
         return tab
 
-    def __init_sec(self):
+    def __init_sec(self,section:ColSection):
         #container stuff
         wgt = QWidget()
         vbox = QVBoxLayout()
@@ -122,7 +126,7 @@ class CoreWidget(QWidget):
         imgbut.setContentsMargins(0, 0, 0, 0)
         imgbut.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-        pixmap = QPixmap('assets/test.jpg')
+        pixmap = QPixmap(self.__get_img(section))
         ratio = pixmap.width() / pixmap.height()
         pixmap = pixmap.scaled(IMG_WIDTH, IMG_WIDTH / ratio, Qt.KeepAspectRatio)
         imgbut.setIcon(QIcon(pixmap))
@@ -134,7 +138,7 @@ class CoreWidget(QWidget):
         vbox.addWidget(imgbut)
 
         #bottom label
-        label = QLabel('lel')
+        label = QLabel('/'.join(section.get_path(0).split('/')[2:])) # display path but only from depth 2 onwards
         label.setAlignment(Qt.AlignCenter)
         label.setContentsMargins(0, 4, 0, 0)
         vbox.addWidget(label)
@@ -142,12 +146,28 @@ class CoreWidget(QWidget):
         wgt.setLayout(vbox)
         return wgt
 
+    def __get_img(self, section:ColSection):
+        try:
+            file=section.get_path()+section.items[0].get_name()
+            if os.path.exists(file):
+                return file
+            else:
+                raise IndexError
+        except IndexError:
+            return 'assets/test.jpg'
+
     def onbutclicked(self,but):
         print(but.height())
 
-
-if __name__=='__main__':
+@click.command()
+@click.option('--pixiv-username',envvar="PIXIV_USERNAME",prompt=True)
+@click.option('--pixiv-password',envvar="PIXIV_PASS",prompt=True, hide_input=True)
+def main(pixiv_username,pixiv_password):
     app = QApplication(sys.argv)
+
+    import builders
+    builders.pixiv_username = pixiv_username
+    builders.pixiv_password = pixiv_password
 
     if os.path.isfile('data.col'):
         cf = ColFile('data.col')
@@ -158,6 +178,9 @@ if __name__=='__main__':
     cf.render()
     print('Ready')
 
-    ui = ColsUI(app,cf)
+    ui = ColsUI(app, cf)
     ui.show()
     sys.exit(app.exec_())
+
+if __name__=='__main__':
+    main()

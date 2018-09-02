@@ -402,6 +402,9 @@ if __name__ == '__main__':
     TEST_EXTENT = 3
     import cols
 
+    builders.pixiv_username = os.getenv('PIXIV_USERNAME')
+    builders.pixiv_password = os.getenv('PIXIV_PASS')
+
     cols.VERBOSITY = 0
     setup_testing()
 

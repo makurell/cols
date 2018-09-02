@@ -6,6 +6,8 @@ import os
 import errno
 import shutil
 import time
+from typing import List, Any
+
 import click
 
 from io import StringIO
@@ -111,6 +113,8 @@ class ColItem:
     #endregion
 
 class ColSection:
+    items: List[ColItem]
+
     def __init__(self, parent):
         self.items=[]
         self.parts=[]
@@ -166,6 +170,13 @@ class ColSection:
                 ret.append((item,item.render()))
             else:
                 if VERBOSITY >= 3: print('[skipped]')
+        return ret
+
+    def get_descendants(self):
+        ret=[]
+        for section in self.sections:
+            ret.append(section)
+            ret.extend(section.get_descendants())
         return ret
 
     def get_items(self):
@@ -283,28 +294,28 @@ class ColFile:
                                 buf+=innerline
 
     def render(self):
-        locs=self.render_from_locs()
+        self.locs=self.render_from_locs()
 
         #render everything and build locdict
         for section in self.sections:
             for loc in section.render():
                 hsh = hash_string(loc[0].get_remote())
-                if hsh not in locs:
-                    locs[hsh]=[loc[1]]
+                if hsh not in self.locs:
+                    self.locs[hsh]=[loc[1]]
                 else:
-                    locs[hsh].append(loc[1])
+                    self.locs[hsh].append(loc[1])
         #todo remove loc entries which are empty
-        self.save_locs(locs)
+        self.save_locs(self.locs)
 
     def render_from_locs(self):
         #read locs
-        locs=None
+        self.locs=None
         try:
             with open('locs.json','r') as f:
-                locs=json.loads(f.read())
+                self.locs=json.loads(f.read())
         except FileNotFoundError:
             return {}
-        loc_items=copy.deepcopy(locs).items()
+        loc_items=copy.deepcopy(self.locs).items()
 
         for hsh,llocs in loc_items:
             i=0
@@ -325,7 +336,7 @@ class ColFile:
                                 if VERBOSITY>=2: print("Already correct: " + loc[0] + loc[1][0]+'-'+loc[1][-1])
                                 item.skip_render=True
                             else:
-                                del locs[curhash][i]
+                                del self.locs[curhash][i]
                         else:
                             for f in loc[1]:
                                 if VERBOSITY>=1:
@@ -339,12 +350,12 @@ class ColFile:
                                     break
                             else:
                                 needs_appending=True
-                                for xloc in locs[hsh]:
+                                for xloc in self.locs[hsh]:
                                     if xloc[0]==item_path:
                                         needs_appending=False
                                         break
                                 if needs_appending:
-                                    locs[hsh].append((item_path,loc[1],loc[2]))
+                                    self.locs[hsh].append((item_path,loc[1],loc[2]))
                                 item.skip_render=True # if loop was never broken (i.e: src file exists)
                 i+=1
 
@@ -357,7 +368,7 @@ class ColFile:
                         break
                 if not needed:
                     # delete orig
-                    locs[hsh].remove(loc) # del from locdict
+                    self.locs[hsh].remove(loc) # del from locdict
 
                     for f in loc[1]:
                         os.remove(loc[0]+f) # del file
@@ -371,7 +382,7 @@ class ColFile:
 
                     if VERBOSITY>=1: print("Deleted: "+loc[0]+(loc[1][0] if rem_dir != '' else rem_dir))
 
-        return locs
+        return self.locs
 
     def save_locs(self, locs):
         with open('locs.json','w') as f:
@@ -443,6 +454,7 @@ def run(file,base,verbosity,elapsed,
     global VERBOSITY
     VERBOSITY=verbosity
 
+    import builders
     builders.pixiv_username=pixiv_username
     builders.pixiv_password=pixiv_password
 
