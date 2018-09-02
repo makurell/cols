@@ -210,6 +210,11 @@ class CoreWidget(QWidget):
         new_item=ColItem(section)
         new_item.parts = [self.remote,None,None]
         section.items.append(new_item)
+
+        with FileLock(self.cf.path + '.lock', 1):
+            with open(self.cf.path, 'w') as f:
+                f.write(self.cf.serialise())
+
         self.history[section.get_path()]=int(time.time())
         self.save_data()
         print('UI added url: '+self.remote)
@@ -255,14 +260,11 @@ def quit():
         quit_flag=True
 
 def render_loop(cf):
-    while True:
+    while not quit_flag:
         try:
             # print('render_loop')
             cf.parse()
             cf.render()
-            with FileLock(cf.path+'.lock',1):
-                with open(cf.path, 'w') as f:
-                    f.write(cf.serialise())
         except:
             traceback.print_exc()
         time.sleep(5)
@@ -292,15 +294,13 @@ def main(pixiv_username,pixiv_password):
     keyboard.add_hotkey('ctrl+alt+x',close)
     keyboard.add_hotkey('ctrl+alt+s',set_save_flag,args=(True,))
 
-    while True:
+    while not quit_flag:
         global save_flag
         if save_flag:
             try:
                 do_dialog(app,cf)
             finally:
                 save_flag=False
-        if quit_flag:
-            break
         time.sleep(0.1)
 
 if __name__=='__main__':

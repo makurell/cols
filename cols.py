@@ -302,18 +302,19 @@ class ColFile:
                                 buf+=innerline
 
     def render(self):
-        self.locs=self.render_from_locs()
+        with FileLock('render.lock'):
+            self.locs=self.render_from_locs()
 
-        #render everything and build locdict
-        for section in self.sections:
-            for loc in section.render():
-                hsh = hash_string(loc[0].get_remote())
-                if hsh not in self.locs:
-                    self.locs[hsh]=[loc[1]]
-                else:
-                    self.locs[hsh].append(loc[1])
-        #todo remove loc entries which are empty
-        self.save_locs(self.locs)
+            #render everything and build locdict
+            for section in self.sections:
+                for loc in section.render():
+                    hsh = hash_string(loc[0].get_remote())
+                    if hsh not in self.locs:
+                        self.locs[hsh]=[loc[1]]
+                    else:
+                        self.locs[hsh].append(loc[1])
+            #todo remove loc entries which are empty
+            self.save_locs(self.locs)
 
     def render_from_locs(self):
         #read locs
