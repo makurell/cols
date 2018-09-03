@@ -1,9 +1,12 @@
+import datetime
 import json
+import logging
 import os
 import random
 import time
 import traceback
 
+import filelock
 import keyboard
 import threading
 
@@ -204,7 +207,7 @@ class CoreWidget(QWidget):
             else:
                 raise IndexError
         except (IndexError,TypeError,AttributeError,KeyError):
-            return 'assets/placeholder.png'
+            return 'zassets/placeholder.png'
 
     def on_but_clicked(self, but, section:ColSection):
         new_item=ColItem(section)
@@ -273,6 +276,13 @@ def render_loop(cf):
 @click.option('--pixiv-username',envvar="PIXIV_USERNAME",prompt=True)
 @click.option('--pixiv-password',envvar="PIXIV_PASS",prompt=True, hide_input=True)
 def main(pixiv_username,pixiv_password):
+    #logging setup
+    if not os.path.exists('logs'):
+        os.makedirs('logs')
+    logging.basicConfig(filename='logs/'+datetime.datetime.now().strftime('%y-%m-%d_%H-%M')+'.txt',format='[%(asctime)s][%(levelname)s] %(message)s', level=logging.DEBUG)
+    filelock.logger().setLevel(logging.WARNING)
+    #todo add logging
+
     app = QApplication(sys.argv)
 
     import builders

@@ -4,6 +4,7 @@ locs.json
 cols/
 uidata.json
 data.col
+logs/
 
 # User-specific stuff
 .idea/**/workspace.xml
